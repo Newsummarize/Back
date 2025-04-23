@@ -44,3 +44,13 @@
              └── news_body_crawler.py
                    ├─ URL 기반 본문 크롤링
                    └─ 메모리 or DB 저장
+📱 사용자
+   │
+   ▼
+🔍 /search?query=AI (Flask: 5006)
+   └── 키워드 기반 뉴스 수집
+         ├─ 네이버 오픈 API 호출
+         ├─ newspaper3k로 본문 파싱
+         ├─ MySQL 저장
+         └─ 최대 6개 뉴스 반환
+
