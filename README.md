@@ -24,7 +24,7 @@
 | 카테고리 탭      | GET    | `/api/news/category`         | 송성민   | ✅ 개발 완료     |
 | 주요 뉴스        | GET    | `/api/news/main`             | 송성민   | ✅ 개발 완료     |
 | 추천 뉴스        | GET    | `/api/news/recommend`        | 송성민   | 🔧 추가 보완 필요 |
-| AI 요약          | GET    | `/ | 송성민   | ❌ 미완료 |
+| AI 요약          | GET    |  | 송성민   | ❌ 미완료 |
 | 키워드 검색      | GET    | `/api/news/search`           | 송성민   | ✅ 개발 완료 |
 
 ---
