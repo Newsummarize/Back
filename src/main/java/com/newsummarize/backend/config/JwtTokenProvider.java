@@ -15,9 +15,14 @@ public class JwtTokenProvider {
     private final long validityInMs;
 
     public JwtTokenProvider(JwtProperties jwtProperties) {
+        if (jwtProperties.getSecret() == null || jwtProperties.getExpiration() == null) {
+            throw new IllegalStateException("JWT 설정 누락: application.yml에 secret/expiration 확인");
+        }
+
         this.secretKey = jwtProperties.getSecret();
         this.validityInMs = jwtProperties.getExpiration();
     }
+
 
     @PostConstruct
     protected void init() {
