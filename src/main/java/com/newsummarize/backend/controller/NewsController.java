@@ -32,12 +32,5 @@ public class NewsController {
         return ResponseEntity.ok(news);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<?> searchNews(@RequestParam("keyword") String keyword,
-                                        @RequestHeader("Authorization") String token) {
-        String pureToken = token.startsWith("Bearer ") ? token.substring(7) : token;
 
-        Object response = newsService.searchByKeyword(keyword);
-        return ResponseEntity.ok(response);
-    }
 }

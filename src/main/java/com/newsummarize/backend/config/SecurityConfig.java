@@ -2,6 +2,7 @@ package com.newsummarize.backend.config;
 
 import com.newsummarize.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,7 +38,13 @@ public class SecurityConfig {
                                 "/api/users/login",
                                 "/api/users/logout",
                                 "/api/news/category",
-                                "/api/news/main"
+                                "/api/news/main",
+
+                                // Swagger 관련 경로 허용
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

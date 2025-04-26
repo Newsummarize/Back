@@ -249,3 +249,7 @@ eval "set -- $(
     )" '"$@"'
 
 exec "$JAVACMD" "$@"
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["-Xlint:unchecked", "-Xlint:deprecation"]
+}
