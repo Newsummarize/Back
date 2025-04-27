@@ -5,6 +5,23 @@ target/
 !**/src/test/**/target/
 
 ### STS ###
+
+### Gradle ###
+.gradle/
+build/
+target/
+libs/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### VS Code ###
+.vscode/
+
+### Spring Tool Suite (STS) ###
 .apt_generated
 .classpath
 .factorypath
@@ -33,3 +50,6 @@ build/
 .vscode/
 
 out/
+=======
+### 기타 ###
+HELP.md

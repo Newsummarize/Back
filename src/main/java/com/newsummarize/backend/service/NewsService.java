@@ -16,8 +16,10 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,17 +32,15 @@ public class NewsService {
 
     @Transactional
     public List<News> getMainNews() {
-        String flaskUrl = "http://3.37.61.85:5001/news?category=all&limit=8";
+        String flaskUrl = "http://3.34.224.162:5001/news?category=all&limit=8";
         RestTemplate restTemplate = new RestTemplate();
 
         try {
             Map<String, Object> response = restTemplate.getForObject(flaskUrl, Map.class);
             List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
 
-            // ✅ 이미 DB에 저장된 뉴스 URL 목록 불러오기
             Set<String> existingUrls = newsRepository.findAllUrls();
 
-            // ✅ 새로 들어온 뉴스 중 중복 아닌 것만 골라서 News 객체로 변환
             List<News> newNewsList = articles.stream()
                     .map(article -> {
                         News news = new News();
@@ -53,13 +53,11 @@ public class NewsService {
                         news.setContent((String) article.get("content"));
                         return news;
                     })
-                    .filter(news -> !existingUrls.contains(news.getUrl())) // 중복 제거
+                    .filter(news -> !existingUrls.contains(news.getUrl()))
                     .toList();
 
-            // DB에 저장
             newsRepository.saveAll(newNewsList);
 
-            // 최종적으로 응답할 뉴스 목록 (방금 받은 8개 전체 반환)
             return articles.stream().map(article -> {
                 News news = new News();
                 news.setTitle((String) article.get("title"));
@@ -79,61 +77,82 @@ public class NewsService {
         }
     }
 
-
     public List<News> getRecommendedNews(String token) {
         String email = jwtTokenProvider.getUsername(token);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        String category = user.getInterests().stream()
-                .findFirst()
+        List<String> interests = user.getInterests().stream()
                 .map(Interest::getInterestCategory)
-                .orElse("all");
-
-        String flaskUrl = "http://3.37.61.85:5001/news?category=" + category + "&limit=2";
-        RestTemplate restTemplate = new RestTemplate();
-
-        Map<String, Object> response = restTemplate.getForObject(flaskUrl, Map.class);
-        List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
-
-        List<Map<String, Object>> top2Articles = articles.stream()
-                .limit(2)
                 .collect(Collectors.toList());
 
-        List<News> result = top2Articles.stream().map(article -> {
-            News news = new News();
+        Set<String> defaultCategories = Set.of("정치", "경제", "사회", "생활/문화", "세계", "IT/과학");
+        Set<String> allowedKeywords = Set.of(
+                "정치", "경제", "사회", "생활/문화", "세계", "IT/과학",
+                "스포츠", "주식", "부동산", "AI", "로봇", "교육",
+                "연예", "영화", "드라마", "음악", "여행", "음식/맛집",
+                "기후위기", "환경오염", "사건사고", "법원/검찰", "북한",
+                "외교", "입시", "라이프스타일", "청소년", "철학"
+        );
 
-            // id 수동 매핑
-            Object idObj = article.get("news_id");
-            if (idObj != null) {
-                try {
-                    news.setId(Long.parseLong(idObj.toString()));
-                } catch (NumberFormatException e) {
-                    System.out.println("⚠️ news_id 파싱 오류: " + idObj);
-                }
+        RestTemplate restTemplate = new RestTemplate();
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+
+        List<CompletableFuture<News>> futures = interests.stream()
+                .filter(allowedKeywords::contains)
+                .map(category -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        if (defaultCategories.contains(category)) {
+                            String url = "http://3.34.224.162:5001/news?category=" + category + "&limit=1";
+                            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+                            List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
+                            return articles != null && !articles.isEmpty() ? mapToNews(articles.get(0)) : null;
+                        } else {
+                            Object rawResponse = searchByKeyword(category);
+                            if (rawResponse instanceof Map<?, ?> responseMap) {
+                                List<Map<String, Object>> articles = (List<Map<String, Object>>) responseMap.get("articles");
+                                return articles != null && !articles.isEmpty() ? mapToNews(articles.get(0)) : null;
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("❌ 관심사 '" + category + "' 뉴스 추천 실패: " + e.getMessage());
+                    }
+                    return null;
+                }, executor))
+                .toList();
+
+        List<News> recommended = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .toList();
+
+        executor.shutdown();
+        return recommended;
+    }
+
+    private News mapToNews(Map<String, Object> article) {
+        News news = new News();
+        news.setTitle((String) article.get("title"));
+        news.setPublisher((String) article.get("publisher"));
+        news.setPublishedAt(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
+        news.setUrl((String) article.get("url"));
+        news.setCategory((String) article.get("category"));
+        news.setImageUrl((String) article.get("image_url"));
+        news.setContent((String) article.get("content"));
+
+        Object idObj = article.get("news_id");
+        if (idObj != null) {
+            try {
+                news.setId(((Number) idObj).longValue());
+            } catch (Exception e) {
+                System.out.println("⚠️ news_id 파싱 오류: " + idObj);
             }
-
-            news.setTitle((String) article.get("title"));
-            news.setPublisher((String) article.get("publisher"));
-
-            String publishedAtStr = ((String) article.get("published_at")).replace(" ", "T");
-            news.setPublishedAt(LocalDateTime.parse(publishedAtStr));
-
-            news.setUrl((String) article.get("url"));
-            news.setCategory((String) article.get("category"));
-            news.setImageUrl((String) article.get("image_url"));
-            news.setContent((String) article.get("content"));
-
-            return news;
-        }).toList();
-
-
-
-        return result;
+        }
+        return news;
     }
 
     public List<News> getNewsByCategory(String category) {
-        String flaskUrl = "http://3.37.61.85:5001/news?category=" + category + "&limit=10";
+        String flaskUrl = "http://3.34.224.162:5001/news?category=" + category + "&limit=10";
         try {
             RestTemplate restTemplate = new RestTemplate();
             Map<String, Object> response = restTemplate.getForObject(flaskUrl, Map.class);
@@ -148,7 +167,7 @@ public class NewsService {
                 news.setCategory((String) article.get("category"));
                 news.setImageUrl((String) article.get("image_url"));
                 news.setContent((String) article.get("content"));
-                news.setId(((Number) article.get("news_id")).longValue()); // ID도 담아줌
+                news.setId(((Number) article.get("news_id")).longValue());
                 return news;
             }).toList();
 
@@ -160,9 +179,7 @@ public class NewsService {
 
     public Object searchByKeyword(String keyword) {
         try {
-            String flaskUrl = "http://3.37.61.85:5006/search?query=" + keyword;
-
-
+            String flaskUrl = "http://3.34.224.162:5009/api/news/recommend?keyword=" + keyword;
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<Object> response = restTemplate.getForEntity(flaskUrl, Object.class);
             return response.getBody();
