@@ -82,53 +82,79 @@ public class NewsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        List<String> interests = user.getInterests().stream()
+        List<String> allInterests = user.getInterests().stream()
                 .map(Interest::getInterestCategory)
                 .collect(Collectors.toList());
-
-        Set<String> defaultCategories = Set.of("정치", "경제", "사회", "생활/문화", "세계", "IT/과학");
-        Set<String> allowedKeywords = Set.of(
-                "정치", "경제", "사회", "생활/문화", "세계", "IT/과학",
-                "스포츠", "주식", "부동산", "AI", "로봇", "교육",
-                "연예", "영화", "드라마", "음악", "여행", "음식/맛집",
-                "기후위기", "환경오염", "사건사고", "법원/검찰", "북한",
-                "외교", "입시", "라이프스타일", "청소년", "철학"
-        );
 
         RestTemplate restTemplate = new RestTemplate();
         ExecutorService executor = Executors.newFixedThreadPool(6);
 
-        List<CompletableFuture<News>> futures = interests.stream()
-                .filter(allowedKeywords::contains)
-                .map(category -> CompletableFuture.supplyAsync(() -> {
-                    try {
-                        if (defaultCategories.contains(category)) {
-                            String url = "http://3.34.224.162:5001/news?category=" + category + "&limit=1";
-                            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-                            List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
-                            return articles != null && !articles.isEmpty() ? mapToNews(articles.get(0)) : null;
-                        } else {
-                            Object rawResponse = searchByKeyword(category);
-                            if (rawResponse instanceof Map<?, ?> responseMap) {
-                                List<Map<String, Object>> articles = (List<Map<String, Object>>) responseMap.get("articles");
-                                return articles != null && !articles.isEmpty() ? mapToNews(articles.get(0)) : null;
-                            }
+        try {
+            List<String> shuffledInterests = new ArrayList<>(allInterests);
+            Collections.shuffle(shuffledInterests);
+
+            // 우선 2개 뽑아서 시도
+            List<String> initialSelected = shuffledInterests.stream().limit(2).toList();
+
+            List<CompletableFuture<News>> initialFutures = initialSelected.stream()
+                    .map(category -> CompletableFuture.supplyAsync(() -> fetchNewsByCategory(category, restTemplate), executor))
+                    .toList();
+
+            CompletableFuture.allOf(initialFutures.toArray(new CompletableFuture[0])).join();
+
+            List<News> recommended = initialFutures.stream()
+                    .map(CompletableFuture::join)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            // 만약 2개가 안 나왔으면 나머지 관심사로 추가 시도
+            if (recommended.size() < 2) {
+                for (String category : shuffledInterests) {
+                    if (initialSelected.contains(category)) continue; // 이미 시도한 건 패스
+
+                    News news = fetchNewsByCategory(category, restTemplate);
+                    if (news != null) {
+                        recommended.add(news);
+                        if (recommended.size() == 2) {
+                            break;
                         }
-                    } catch (Exception e) {
-                        System.out.println("❌ 관심사 '" + category + "' 뉴스 추천 실패: " + e.getMessage());
                     }
-                    return null;
-                }, executor))
-                .toList();
+                }
+            }
 
-        List<News> recommended = futures.stream()
-                .map(CompletableFuture::join)
-                .filter(Objects::nonNull)
-                .toList();
+            return recommended;
 
-        executor.shutdown();
-        return recommended;
+        } finally {
+            executor.shutdown();
+        }
     }
+
+    // 기본 카테고리만 별도로 구분
+    private boolean isDefaultCategory(String category) {
+        return Set.of("정치", "경제", "사회", "생활/문화", "세계", "IT/과학")
+                .contains(category);
+    }
+
+    private News fetchNewsByCategory(String category, RestTemplate restTemplate) {
+        try {
+            if (isDefaultCategory(category)) {
+                String url = "http://3.34.224.162:5001/news?category=" + URLEncoder.encode(category, StandardCharsets.UTF_8);
+                Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+                List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
+                return (articles != null && !articles.isEmpty()) ? mapToNews(articles.get(0)) : null;
+            } else {
+                Object rawResponse = searchByKeyword(category);
+                if (rawResponse instanceof Map<?, ?> responseMap) {
+                    List<Map<String, Object>> articles = (List<Map<String, Object>>) responseMap.get("articles");
+                    return (articles != null && !articles.isEmpty()) ? mapToNews(articles.get(0)) : null;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("❌ 관심사 '" + category + "' 뉴스 추천 실패: " + e.getMessage());
+        }
+        return null;
+    }
+
 
     private News mapToNews(Map<String, Object> article) {
         News news = new News();

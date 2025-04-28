@@ -86,21 +86,27 @@ public class UserService {
     }
 
     @Transactional
-    public void addInterest(String token, String interestName) {
-        String pureToken = token.startsWith("Bearer ") ? token.substring(7) : token;
-        String email = jwtTokenProvider.getUsername(pureToken);
-        User user = userRepository.findWithInterestsByEmail(email)
+    public void addInterest(String token, String newCategory) {
+        String email = jwtTokenProvider.getUsername(token);
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        Interest interest = interestRepository.findByInterestCategory(interestName)
-                .orElseThrow(() -> new RuntimeException("해당 관심사 없음"));
+        Interest interest = interestRepository.findByInterestCategory(newCategory)
+                .orElseGet(() -> {
+                    Interest newInterest = Interest.builder()
+                            .interestCategory(newCategory)
+                            .build();
+                    return interestRepository.save(newInterest);
+                });
 
-        if (user.getInterests().contains(interest)) {
+        if (!user.getInterests().contains(interest)) {
+            user.getInterests().add(interest);
+            userRepository.save(user);
+        } else {
             throw new RuntimeException("이미 추가된 관심사입니다.");
         }
-
-        user.getInterests().add(interest);
     }
+
 
     @Transactional
     public void removeInterest(String token, String interestCategory) {
