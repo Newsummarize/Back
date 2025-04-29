@@ -46,7 +46,7 @@ public class NewsService {
                         News news = new News();
                         news.setTitle((String) article.get("title"));
                         news.setPublisher((String) article.get("publisher"));
-                        news.setPublishedAt(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
+                        news.setPublished_at(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
                         news.setUrl((String) article.get("url"));
                         news.setCategory((String) article.get("category"));
                         news.setImageUrl((String) article.get("image_url"));
@@ -62,7 +62,7 @@ public class NewsService {
                 News news = new News();
                 news.setTitle((String) article.get("title"));
                 news.setPublisher((String) article.get("publisher"));
-                news.setPublishedAt(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
+                news.setPublished_at(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
                 news.setUrl((String) article.get("url"));
                 news.setCategory((String) article.get("category"));
                 news.setImageUrl((String) article.get("image_url"));
@@ -134,7 +134,7 @@ public class NewsService {
         News news = new News();
         news.setTitle((String) article.get("title"));
         news.setPublisher((String) article.get("publisher"));
-        news.setPublishedAt(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
+        news.setPublished_at(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
         news.setUrl((String) article.get("url"));
         news.setCategory((String) article.get("category"));
         news.setImageUrl((String) article.get("image_url"));
@@ -162,7 +162,7 @@ public class NewsService {
                 News news = new News();
                 news.setTitle((String) article.get("title"));
                 news.setPublisher((String) article.get("publisher"));
-                news.setPublishedAt(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
+                news.setPublished_at(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
                 news.setUrl((String) article.get("url"));
                 news.setCategory((String) article.get("category"));
                 news.setImageUrl((String) article.get("image_url"));
