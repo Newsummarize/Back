@@ -58,12 +58,12 @@ public class SearchController {
         } catch (RuntimeException ex) {
             System.out.println("[Error] >>> 서버 내부에 문제가 발생했습니다: " + ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ErrorResponse(400, "Bad Request", "서버 내부에 문제가 발생했습니다.")
+                    new ErrorResponse(500, "Internal Server Error", "서버 내부에 문제가 발생했습니다.")
             );
         } catch (Exception e) {
             System.out.println("[Error] >>> 예상치 못한 문제가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ErrorResponse(400, "Bad Request", "예상치 못한 문제가 발생했습니다.")
+                    new ErrorResponse(500, "Internal Server Error", "예상치 못한 문제가 발생했습니다.")
             );
         }
     }
