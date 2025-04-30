@@ -6,27 +6,26 @@ plugins {
 
 group = 'com.newsummarize'
 version = '0.0.1-SNAPSHOT'
-description = 'NewsummarizeBackend'
 sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
 }
 
-ext {
-    jwtSecret = 'ReplaceThisWithAStrongSecretKey'
-    jwtExpiration = 3600000 // 1시간
-}
-
 dependencies {
-    // Spring Boot Starter
+
+
+
+
+    // Spring Boot Starters (logback 포함됨 - 별도로 추가하지 않아도 됨)
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    // MySQL Connector
+
+    // MySQL
     runtimeOnly 'com.mysql:mysql-connector-j'
 
     // JWT
@@ -38,23 +37,17 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    // Redis connection pool
-    implementation 'org.apache.commons:commons-pool2'
-
-    // DevTools (Hot Reload)
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-    // Test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-    
+
+    // 기타
+    implementation 'org.apache.commons:commons-pool2'
+
+    // 테스트
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 test {
     useJUnitPlatform()
 }
-
-

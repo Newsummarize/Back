@@ -39,3 +39,7 @@ jvm:
   memory:
     xmx: 2g
     xms: 1g
+
+server:
+  port: 8080
+  address: 0.0.0.0

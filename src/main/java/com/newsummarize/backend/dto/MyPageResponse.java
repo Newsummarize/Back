@@ -10,7 +10,7 @@ import java.util.List;
 public class MyPageResponse {
     private String userName;
     private String email;
-    private String age;
+    private int age;
     private String gender;
     private List<String> interests;
 }

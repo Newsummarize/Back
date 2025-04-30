@@ -32,14 +32,15 @@ public class UserController {
     }
 
     @PostMapping("/interests")
-    public ResponseEntity<?> addInterest(@RequestBody InterestRequest request,
-                                         @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> addInterest(@RequestHeader("Authorization") String authHeader,
+                                         @RequestParam("interest") String interestCategory) {
         String token = resolveToken(authHeader);
-        userService.addInterest(token, request.getInterest());
+        userService.addInterest(token, interestCategory);
         return ResponseEntity.ok().body(
-                new MessageResponse("관심사 '" + request.getInterest() + "'가 추가되었습니다.")
+                new MessageResponse("관심사 '" + interestCategory + "'가 추가되었습니다.")
         );
     }
+
 
     @DeleteMapping("/interests")
     public ResponseEntity<?> removeInterest(@RequestParam String interest,

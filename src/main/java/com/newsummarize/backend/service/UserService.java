@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.newsummarize.backend.dto.ChangePasswordRequest;
 
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,30 +32,31 @@ public class UserService {
 
     @Transactional
     public void signup(SignupRequest request) {
-        // 1. 비밀번호 확인
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 2. 이메일 중복 확인
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("이미 가입된 이메일입니다.");
         }
 
-        // 3. 관심사 매핑
         Set<String> interestNames = request.getInterests();
         Set<Interest> interestEntities = interestNames.stream()
                 .map(name -> interestRepository.findByInterestCategory(name)
                         .orElseThrow(() -> new RuntimeException("해당 관심사가 존재하지 않습니다: " + name)))
                 .collect(Collectors.toSet());
 
-        // 4. User 생성 및 저장
+        // 생년월일 계산
+        LocalDate birthDate = LocalDate.of(request.getYear(), request.getMonth(), request.getDay());
+        int age = Period.between(birthDate, LocalDate.now()).getYears();
+
         User user = new User();
         user.setUserName(request.getUserName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setAge(request.getAge());
+        user.setAge(age);
         user.setGender(request.getGender());
+        user.setBirthDate(birthDate);  // birth_date 필드 저장
         user.setInterests(interestEntities);
 
         userRepository.save(user);
