@@ -24,7 +24,7 @@ public class News {
 
     private String publisher;
 
-    private LocalDateTime publishedAt;
+    private LocalDateTime published_at;
 
     private String url;
 
