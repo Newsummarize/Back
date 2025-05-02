@@ -40,6 +40,8 @@ public class SecurityConfig {
                                 "/api/users/logout",
                                 "/api/news/category",
                                 "/api/news/main",
+                                "/api/search",
+                                "/api/search/analytics",
 
                                 // Swagger 관련 경로 허용
                                 "/swagger-ui/**",
