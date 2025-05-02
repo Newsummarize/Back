@@ -23,38 +23,43 @@ public class UserController {
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    record MessageResponse(String message) {
+    }
+
     @GetMapping("/me")
     public ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(userService.getMyPage(user));
     }
 
     @PostMapping("/interests")
-    public ResponseEntity<?> addInterest(@RequestBody InterestRequest request,
-                                         @RequestHeader("Authorization") String token) {
-        userService.addInterest(token, request.getInterest());
+    public ResponseEntity<?> addInterest(@RequestHeader("Authorization") String authHeader,
+                                         @RequestParam("interest") String interestCategory) {
+        String token = resolveToken(authHeader);
+        userService.addInterest(token, interestCategory);
         return ResponseEntity.ok().body(
-                new MessageResponse("관심사 '" + request.getInterest() + "'가 추가되었습니다.")
+                new MessageResponse("관심사 '" + interestCategory + "'가 추가되었습니다.")
         );
     }
 
+
     @DeleteMapping("/interests")
     public ResponseEntity<?> removeInterest(@RequestParam String interest,
-                                            @RequestHeader("Authorization") String token) {
+                                            @RequestHeader("Authorization") String authHeader) {
+        String token = resolveToken(authHeader);
         userService.removeInterest(token, interest);
         return ResponseEntity.ok().body(
                 new MessageResponse("관심사 '" + interest + "'가 삭제되었습니다.")
         );
     }
 
-    record MessageResponse(String message) {
-    }
-
     @PutMapping("/password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request,
-                                            @RequestHeader("Authorization") String token) {
+                                            @RequestHeader("Authorization") String authHeader) {
+        String token = resolveToken(authHeader);
         userService.changePassword(token, request);
         return ResponseEntity.ok(new MessageResponse("비밀번호가 성공적으로 변경되었습니다."));
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
@@ -69,4 +74,12 @@ public class UserController {
         userService.deleteUser(token);
         return ResponseEntity.ok(new MessageResponse("회원 탈퇴가 완료되었습니다."));
     }
+
+    private String resolveToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7).trim();
+        }
+        throw new RuntimeException("유효하지 않은 Authorization 헤더입니다.");
+    }
+
 }

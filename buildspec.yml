@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "[BUILD] Installing dependencies..."
+  build:
+    commands:
+      - echo "[BUILD] Building the Spring Boot JAR..."
+      - ./gradlew clean build -x test
+
+artifacts:
+  files:
+    - build/libs/*.jar
+    - appspec.yml
+    - scripts/deploy.sh
+  discard-paths: yes

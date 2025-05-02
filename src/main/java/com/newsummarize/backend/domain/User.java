@@ -3,6 +3,7 @@ package com.newsummarize.backend.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +22,11 @@ public class User {
     private String userName;            // user_name
 
     @Column(nullable = true)
-    private String age;                // age
+    private int age;                // age
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
