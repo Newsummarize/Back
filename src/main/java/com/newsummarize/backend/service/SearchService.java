@@ -32,7 +32,7 @@ public class SearchService {
                 news.setUrl((String) article.get("url"));
                 news.setCategory((String) article.get("category"));
                 news.setPublisher((String) article.get("publisher"));
-                news.setPublished_at(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
+                news.setPublishedAt(LocalDateTime.parse(((String) article.get("published_at")).replace(" ", "T")));
                 news.setImageUrl((String) article.get("image_url"));
                 news.setContent((String) article.get("content"));
                 return news;

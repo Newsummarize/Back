@@ -17,7 +17,6 @@ public class WebConfig {
             // CORS 매핑 규칙 정의
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-<<<<<<< HEAD
                 registry.addMapping("/**") // 모든 URL 경로에 대해 CORS 적용
                         .allowedOrigins(
                                 "http://localhost:5173",        // 개발 환경 (로컬 프론트엔드 주소)
@@ -31,18 +30,7 @@ public class WebConfig {
                         .allowCredentials(true)
                         // preflight 요청 결과를 3600초(1시간) 동안 캐시 (OPTIONS 요청 최소화)
                         .maxAge(3600);
-=======
-                registry.addMapping("/**") // 모든 API URL 허용
-                        .allowedOrigins(
-                                "http://localhost:5173", // 로컬 개발용
-                                "https://newsummarize.com" // 실제 배포용 도메인
-                        )
-                        // 허용할 프론트엔드 주소
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
-                        .allowedHeaders("*") // 모든 헤더 허용
-                        .allowCredentials(true) // 쿠키/헤더 포함 허용 (JWT 인증할 때 필요할 수 있음)
-                        .maxAge(3600); // preflight 요청 결과 1시간(3600초) 캐시
->>>>>>> 6cbeea2fd0aec32005a071a6689ede579ebb0f75
+
             }
         };
     }
