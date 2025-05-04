@@ -3,11 +3,11 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing..."
+      - echo "Installing dependencies..."
       - chmod +x gradlew
   build:
     commands:
-      - echo "Building..."
+      - echo "Building project..."
       - ./gradlew clean build -x test
 
 artifacts:

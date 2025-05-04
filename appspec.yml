@@ -1,10 +1,11 @@
 version: 0.0
 os: linux
 files:
-  - source: build/libs/
-    destination: /home/ubuntu
-  - source: scripts/
-    destination: /home/ubuntu/scripts
+  - source: build/libs/newsummarize.jar
+    destination: /home/ubuntu/
+  - source: scripts/deploy.sh
+    destination: /home/ubuntu/
+
 hooks:
   AfterInstall:
     - location: scripts/deploy.sh
