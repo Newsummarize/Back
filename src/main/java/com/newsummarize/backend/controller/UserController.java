@@ -1,3 +1,4 @@
+// 사용자 정보 관련 API (마이페이지, 관심사, 비밀번호 등)를 처리하는 컨트롤러
 package com.newsummarize.backend.controller;
 
 import com.newsummarize.backend.config.JwtTokenProvider;
@@ -13,24 +14,38 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.newsummarize.backend.dto.ChangePasswordRequest;
 
-
+// REST API 컨트롤러임을 명시
 @RestController
+
+// 생성자 주입을 위한 Lombok 어노테이션
 @RequiredArgsConstructor
+
+// 모든 요청의 기본 URL 경로는 /api/users
 @RequestMapping("/api/users")
 public class UserController {
 
+    // 사용자 관련 서비스 (마이페이지, 관심사, 비밀번호 등)
     private final UserService userService;
+
+    // 로그아웃 처리를 위한 인증 서비스
     private final AuthService authService;
+
+    // JWT 토큰 관련 유틸리티 (파싱, 검증)
     private final JwtTokenProvider jwtTokenProvider;
 
+    // 응답 메시지를 담기 위한 간단한 레코드 클래스
     record MessageResponse(String message) {
     }
 
+    // [GET] /api/users/me
+    // 현재 로그인한 사용자의 마이페이지 정보 조회
     @GetMapping("/me")
     public ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(userService.getMyPage(user));
     }
 
+    // [POST] /api/users/interests
+    // 관심사 추가 (토큰 기반 사용자 식별)
     @PostMapping("/interests")
     public ResponseEntity<?> addInterest(@RequestHeader("Authorization") String authHeader,
                                          @RequestParam("interest") String interestCategory) {
@@ -41,7 +56,8 @@ public class UserController {
         );
     }
 
-
+    // [DELETE] /api/users/interests
+    // 관심사 제거 (토큰 기반 사용자 식별)
     @DeleteMapping("/interests")
     public ResponseEntity<?> removeInterest(@RequestParam String interest,
                                             @RequestHeader("Authorization") String authHeader) {
@@ -52,6 +68,8 @@ public class UserController {
         );
     }
 
+    // [PUT] /api/users/password
+    // 비밀번호 변경 요청 처리
     @PutMapping("/password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request,
                                             @RequestHeader("Authorization") String authHeader) {
@@ -60,7 +78,8 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("비밀번호가 성공적으로 변경되었습니다."));
     }
 
-
+    // [POST] /api/users/logout
+    // 로그아웃 요청 처리 (Redis에 토큰 저장하여 무효화)
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String token = jwtTokenProvider.resolveToken(request);
@@ -68,6 +87,8 @@ public class UserController {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
+    // [DELETE] /api/users
+    // 회원 탈퇴 처리
     @DeleteMapping
     public ResponseEntity<?> deleteUser(HttpServletRequest request) {
         String token = jwtTokenProvider.resolveToken(request);
@@ -75,11 +96,11 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("회원 탈퇴가 완료되었습니다."));
     }
 
+    // Authorization 헤더에서 Bearer 토큰 추출 (접두어 제거)
     private String resolveToken(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7).trim();
         }
         throw new RuntimeException("유효하지 않은 Authorization 헤더입니다.");
     }
-
 }

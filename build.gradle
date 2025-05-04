@@ -14,9 +14,6 @@ repositories {
 
 dependencies {
 
-
-
-
     // Spring Boot Starters (logback 포함됨 - 별도로 추가하지 않아도 됨)
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

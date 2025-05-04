@@ -1,27 +1,33 @@
+# 도우미 문서 제외
 HELP.md
+
+# 빌드 결과물 디렉토리 무시
 target/
+build/
+libs/
+
+# 예외적으로 필요할 경우 target 포함 허용
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
-
-### Gradle ###
+# Gradle 관련 캐시 및 빌드 디렉토리 무시
 .gradle/
 build/
-target/
 libs/
 
-### IntelliJ IDEA ###
+# IntelliJ IDEA 설정 파일 무시
 .idea/
 *.iws
 *.iml
 *.ipr
 
-### VS Code ###
+# Visual Studio Code 설정 디렉토리 무시
 .vscode/
 
-### Spring Tool Suite (STS) ###
+# Spring Tool Suite (STS) 관련 파일 무시
 .apt_generated
 .classpath
 .factorypath
@@ -30,26 +36,17 @@ libs/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+# NetBeans 관련 디렉토리 무시
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
+# Java 컴파일 결과물
 out/
+
+# 기타 개발 시 생성될 수 있는 파일들 무시
 =======
 ### 기타 ###
 HELP.md
