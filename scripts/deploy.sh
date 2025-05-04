@@ -6,6 +6,8 @@ echo "🚀 [DEPLOY] 배포 스크립트 시작"
 APP_DIR=/home/ubuntu
 JAR_FILE=$(ls $APP_DIR/*.jar | head -n 1)
 
+
+
 if [ -z "$JAR_FILE" ]; then
   echo "❌ [DEPLOY] JAR 파일을 찾을 수 없습니다. 종료합니다." | tee -a $APP_DIR/deploy.log
   exit 1
