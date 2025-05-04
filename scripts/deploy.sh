@@ -6,7 +6,7 @@ cd /home/ubuntu
 
 JAR_NAME=backend-0.0.1-SNAPSHOT.jar
 
-echo "🛑 [DEPLOY] 기존 애플리케이션 종료 중..."
+echo "🛑 [DEPLOY] 기존 애플리케이션 종료 중... "
 PID=$(pgrep -f "$JAR_NAME")
 if [ -n "$PID" ]; then
   echo "🔻 종료된 PID: $PID"
