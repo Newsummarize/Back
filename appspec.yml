@@ -1,17 +1,14 @@
-# CodeDeploy에서 사용하는 appspec 버전 (항상 0.0 고정)
 version: 0.0
-
-# 운영체제 종류 (Amazon EC2는 리눅스 기반)
 os: linux
 
-# S3 또는 CodePipeline에서 복사된 파일을 EC2의 어느 디렉토리에 배치할지 설정
 files:
-  - source: /                                 # S3 zip 내 루트 전체를 대상
-    destination: /home/ec2-user/newsummarize  # EC2에서 파일이 풀리고 복사될 위치
+  - source: newsummarize.jar
+    destination: /home/ec2-user/newsummarize
+  - source: scripts/deploy.sh
+    destination: /home/ec2-user/newsummarize/scripts
 
-# 복사 후 어떤 작업을 수행할지 정의하는 훅(Hooks)
 hooks:
-  AfterInstall:                               # 파일 복사 직후 실행되는 단계
-    - location: scripts/deploy.sh             # 배포 실행 스크립트 경로
-      timeout: 60                             # 실행 제한 시간 (초)
-      runas: ubuntu                           # 이 스크립트를 실행할 EC2 사용자
+  AfterInstall:
+    - location: scripts/deploy.sh
+      timeout: 60
+      runas: ubuntu
