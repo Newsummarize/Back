@@ -12,6 +12,6 @@ pkill -f '.jar' || true              # 기존 jar 프로세스 모두 종료 (�
 sleep 3                              # 3초 대기 (완전 종료 보장)
 
 echo "✅ [DEPLOY] 새 JAR 실행 중: $JAR_PATH"
-nohup java -jar $JAR_PATH > $APP_DIR/app.log 2>&1 &
+nohup java -jar "$JAR_PATH" > /home/ec2-user/newsummarize/nohup.out 2>&1 &
 
 echo "🎉 [DEPLOY] 배포 완료!"
