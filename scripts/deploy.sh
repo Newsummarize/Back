@@ -3,10 +3,11 @@
 echo "🚀 [DEPLOY] 배포 스크립트 시작"
 
 cd /home/ubuntu
+
 JAR_NAME=backend-0.0.1-SNAPSHOT.jar
 
-# 기존 앱 종료
-echo "🛑 [DEPLOY] 기존 실행 중인 애플리케이션 종료..."
+# 기존 프로세스 종료
+echo "🛑 [DEPLOY] 기존 애플리케이션 종료 중..."
 PID=$(pgrep -f "$JAR_NAME")
 if [ -n "$PID" ]; then
   kill -9 "$PID"
