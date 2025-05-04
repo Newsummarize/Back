@@ -16,5 +16,5 @@ fi
 
 # 실행
 echo "✅ [DEPLOY] 새 JAR 실행 중: $JAR_NAME"
-nohup java -jar "$JAR_NAME" > /home/ubuntu/nohup.out 2>&1 &
+nohup java -jar "$JAR_NAME" > nohup.out 2>&1 &
 echo "🎉 [DEPLOY] 배포 완료!"
