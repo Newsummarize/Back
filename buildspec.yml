@@ -5,7 +5,9 @@ phases:
     commands:
       - echo "[BUILD] Building the Spring Boot JAR..."
       - ./gradlew clean build -x test
-      - cp build/libs/*.jar newsummarize.jar  # 여기에서 바로 복사
+      - JAR_FILE=$(ls build/libs/*.jar | grep -v plain | head -n 1)
+      - cp "$JAR_FILE" newsummarize.jar
+
 
 artifacts:
   files:
