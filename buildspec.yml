@@ -3,15 +3,14 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing dependencies..."
+      - echo "Installing..."
       - chmod +x gradlew
   build:
     commands:
-      - echo "Building project..."
+      - echo "Building..."
       - ./gradlew clean build -x test
 
 artifacts:
-  base-directory: .
   files:
     - build/libs/*.jar
     - appspec.yml
