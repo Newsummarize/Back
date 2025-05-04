@@ -12,9 +12,6 @@ repositories {
     mavenCentral()
 }
 
-bootJar {
-    archiveFileName = 'newsummarize.jar'
-}
 
 dependencies {
 
