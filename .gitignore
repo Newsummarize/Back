@@ -1,5 +1,11 @@
-# 도우미 문서 제외
+# macOS 시스템 파일 무시
+.DS_Store
+
+# 도우미 문서 무시
 HELP.md
+
+# Java 컴파일 결과물
+out/
 
 # 빌드 결과물 디렉토리 무시
 target/
@@ -15,8 +21,6 @@ libs/
 
 # Gradle 관련 캐시 및 빌드 디렉토리 무시
 .gradle/
-build/
-libs/
 
 # IntelliJ IDEA 설정 파일 무시
 .idea/
@@ -42,11 +46,3 @@ libs/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-# Java 컴파일 결과물
-out/
-
-# 기타 개발 시 생성될 수 있는 파일들 무시
-=======
-### 기타 ###
-HELP.md
