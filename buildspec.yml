@@ -16,7 +16,7 @@ phases:
 artifacts:
   files:
     # S3 또는 CodeDeploy로 전달할 파일 목록 지정
-    - build/libs/*.jar               # 빌드된 JAR 파일
+    - build/libs/newsummarize.jar               # 빌드된 JAR 파일
     - appspec.yml                    # CodeDeploy 배포 스크립트 정의 파일
     - scripts/deploy.sh             # 배포 후 실행될 스크립트
 

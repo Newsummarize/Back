@@ -12,6 +12,10 @@ repositories {
     mavenCentral()
 }
 
+bootJar {
+    archiveFileName = 'newsummarize.jar'
+}
+
 dependencies {
 
     // Spring Boot Starters (logback 포함됨 - 별도로 추가하지 않아도 됨)
@@ -43,6 +47,8 @@ dependencies {
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 }
 
 test {
