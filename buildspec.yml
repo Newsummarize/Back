@@ -16,3 +16,4 @@ artifacts:
     - appspec.yml
     - scripts/deploy.sh
   discard-paths: yes
+
