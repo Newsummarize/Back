@@ -12,14 +12,12 @@ phases:
       - echo "🚀 Building JAR..."
       - ./gradlew clean build -x test
       - echo "📁 Packaging deployment bundle..."
-      - mkdir -p deploy_bundle
-      - cp build/libs/backend-0.0.1-SNAPSHOT.jar deploy_bundle/
-      - cp appspec.yml deploy_bundle/
-      - cp -r scripts deploy_bundle/
-      - chmod +x scripts/deploy.sh
-      - cd deploy_bundle
-      - zip -r ../newsummarize-v1.zip .
-      - cd ..
+      - cp build/libs/backend-0.0.1-SNAPSHOT.jar .
+      - cp appspec.yml .
+      - mkdir -p scripts
+      - cp scripts/deploy.sh scripts/deploy.sh
 artifacts:
   files:
-    - newsummarize-v1.zip
+    - backend-0.0.1-SNAPSHOT.jar
+    - appspec.yml
+    - scripts/**   # 배포 스크립트 포함
