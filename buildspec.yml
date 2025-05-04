@@ -5,9 +5,9 @@ phases:
     commands:
       - echo "[BUILD] Building the Spring Boot JAR..."
       - ./gradlew clean build -x test
-      - JAR_FILE=$(ls build/libs/*.jar | grep -v plain | head -n 1)
+      - JAR_FILE=$(find build/libs -name "*.jar" ! -name "*plain*" | head -n 1)
+      - echo " Found JAR: $JAR_FILE"
       - cp "$JAR_FILE" newsummarize.jar
-
 
 artifacts:
   files:
