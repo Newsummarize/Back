@@ -1,14 +1,17 @@
+# CodeDeploy에서 사용하는 버전 명시 (고정값: 0.0)
 version: 0.0
+
+# 운영체제 정보 (리눅스 기반)
 os: linux
 
+# S3 또는 CodePipeline에서 받아온 아티팩트를 EC2의 어떤 경로에 복사할지 설정
 files:
-  - source: backend-0.0.1-SNAPSHOT.jar
-    destination: /home/ubuntu
-  - source: scripts/deploy.sh
-    destination: /home/ubuntu/scripts
+  - source: /                                # 배포 대상 루트 (zip 내 전체 파일)
+    destination: /home/ec2-user/newsummarize # EC2에서 압축을 풀고 복사할 경로
 
+# 후처리 스크립트 실행을 위한 훅(hooks) 설정
 hooks:
-  AfterInstall:
-    - location: scripts/deploy.sh
-      timeout: 60
-      runas: ubuntu
+  AfterInstall:                              # 파일 복사 후 실행할 작업 정의
+    - location: scripts/deploy.sh            # 실행할 쉘 스크립트 위치
+      timeout: 60                            # 실행 제한 시간 (초)
+      runas: ubuntu                          # 스크립트를 실행할 사용자 (EC2 사용자)
