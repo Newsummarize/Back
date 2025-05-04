@@ -5,11 +5,7 @@ phases:
     commands:
       - echo "[BUILD] Cleaning and building..."
       - ./gradlew clean build -x test
-      - |
-        JAR_FILE=$(find build/libs -name "*.jar" ! -name "*plain*" | head -n 1)
-        echo "[BUILD] Found jar: $JAR_FILE"
-        cp "$JAR_FILE" backend-0.0.1-SNAPSHOT.jar
-
+      - cp build/libs/backend-0.0.1-SNAPSHOT.jar backend-0.0.1-SNAPSHOT.jar
 
 artifacts:
   files:
