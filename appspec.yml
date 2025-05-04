@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: build/libs/newsummarize-0.0.1-SNAPSHOT.jar
+  - source: build/libs/*.jar
     destination: /home/ubuntu/
   - source: scripts/deploy.sh
     destination: /home/ubuntu/
