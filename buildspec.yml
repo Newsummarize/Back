@@ -1,4 +1,3 @@
-# CodeBuild 스펙 버전 (항상 0.2 고정)
 version: 0.2
 
 phases:
@@ -10,15 +9,14 @@ phases:
       # Gradle 빌드 실행 (테스트는 생략)
       - ./gradlew clean build -x test
 
-      # 빌드 결과물을 이름 변경해서 루트 디렉토리에 복사
-      # → CodeDeploy에서 접근 가능하도록 JAR 이름을 고정
-      - cp build/libs/*.jar newsummarize.jar
+      # 가장 최근 생성된 JAR 파일을 newsummarize.jar로 복사
+      - cp build/libs/*SNAPSHOT.jar newsummarize.jar
 
 artifacts:
   files:
     # CodeDeploy에 전달할 파일 목록
     - newsummarize.jar              # 실행할 스프링 부트 JAR
     - appspec.yml                   # CodeDeploy 배포 설정
-    - scripts/deploy.sh            # EC2에서 실행할 배포 스크립트
+    - scripts/deploy.sh             # EC2에서 실행할 배포 스크립트
 
   discard-paths: yes               # 경로 제거하고 루트에 파일만 저장 (S3 내부 구조 단순화)
