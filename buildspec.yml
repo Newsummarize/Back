@@ -11,6 +11,7 @@ phases:
       - ./gradlew clean build -x test
 
 artifacts:
+  base-directory: . # ← 꼭 추가해줘!
   files:
     - build/libs/*.jar
     - appspec.yml
