@@ -11,12 +11,8 @@ phases:
       - ./gradlew clean build -x test
 
 artifacts:
-  base-directory: build/libs
+  base-directory: .
   files:
-    - backend-0.0.1-SNAPSHOT.jar
-  secondary-artifacts:
-    deploy:
-      base-directory: .
-      files:
-        - appspec.yml
-        - scripts/deploy.sh
+    - build/libs/backend-0.0.1-SNAPSHOT.jar
+    - appspec.yml
+    - scripts/**
