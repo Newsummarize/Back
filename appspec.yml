@@ -1,13 +1,12 @@
 version: 0.0
 os: linux
+
 files:
-  - source: build/libs/*.jar
-    destination: /home/ubuntu/
-  - source: scripts/deploy.sh
-    destination: /home/ubuntu/
+  - source: /
+    destination: /home/ubuntu
 
 hooks:
   AfterInstall:
-    - location: deploy.sh
+    - location: scripts/deploy.sh
       timeout: 60
       runas: ubuntu
