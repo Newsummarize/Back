@@ -3,12 +3,17 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "[BUILD] Building the Spring Boot JAR..."
+      - echo "[BUILD] Cleaning and building..."
       - ./gradlew clean build -x test
+      - echo "[BUILD] Searching for jar..."
       - |
         JAR_FILE=$(find build/libs -name "*.jar" ! -name "*plain*" | head -n 1)
-        echo "Found JAR: $JAR_FILE"
-        cp "$JAR_FILE" newsummarize.jar
+        echo "[BUILD] Found jar: $JAR_FILE"
+        if [ -f "$JAR_FILE" ]; then
+          cp "$JAR_FILE" newsummarize.jar
+        else
+          echo "[ERROR] JAR file not found!" && exit 1
+        fi
 
 artifacts:
   files:
@@ -16,4 +21,3 @@ artifacts:
     - appspec.yml
     - scripts/deploy.sh
   discard-paths: yes
-
