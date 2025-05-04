@@ -4,15 +4,12 @@ phases:
   build:
     commands:
       - echo "[BUILD] Building the Spring Boot JAR..."
-      - cd backend               # 서브디렉토리 진입
       - ./gradlew clean build -x test
-      - cp build/libs/*.jar ../newsummarize.jar  # 루트로 복사
+      - cp build/libs/*.jar newsummarize.jar  # 루트로 복사
 
 artifacts:
   files:
-    # CodeDeploy에 전달할 파일 목록
-    - newsummarize.jar              # 실행할 스프링 부트 JAR
-    - appspec.yml                   # CodeDeploy 배포 설정
-    - scripts/deploy.sh             # EC2에서 실행할 배포 스크립트
-
-  discard-paths: yes               # 경로 제거하고 루트에 파일만 저장 (S3 내부 구조 단순화)
+    - newsummarize.jar
+    - appspec.yml
+    - scripts/deploy.sh
+  discard-paths: yes
