@@ -54,6 +54,13 @@ public class SecurityConfig {
                                 "/api/users/logout",
                                 "/api/news/category",
                                 "/api/news/main",
+<<<<<<< HEAD
+=======
+                                "/api/search",
+                                "/api/search/analytics",
+
+                                // Swagger 관련 경로 허용
+>>>>>>> 6cbeea2fd0aec32005a071a6689ede579ebb0f75
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

@@ -35,10 +35,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/users", "/api/users/",
             "/api/users/login", "/api/users/login/",
-            "/api/users/logout", "/api/users/logout",
+            "/api/users/logout", "/api/users/logout/",
             "/api/news/category", "/api/news/category/",
-            "/api/news/main", "/api/news/main/"
-    );
+            "/api/news/main", "/api/news/main/",
+            "/api/search", "/api/search/",
+            "/api/search/analytics", "/api/search/analytics/"
+            );
 
     // 요청 경로가 예외 목록에 포함되면 필터를 건너뛰도록 설정
     @Override
