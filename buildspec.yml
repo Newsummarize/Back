@@ -1,23 +1,24 @@
-# CodeBuild 사양 버전 (고정값: 0.2 사용)
+# CodeBuild 스펙 버전 (항상 0.2 고정)
 version: 0.2
 
 phases:
-  install:
-    commands:
-      # 의존성 설치 등 초기 작업 (필요 시 추가 가능)
-      - echo "[BUILD] Installing dependencies..."
-
   build:
     commands:
-      # 빌드 작업 수행
+      # 빌드 시작 메시지 출력 (로깅용)
       - echo "[BUILD] Building the Spring Boot JAR..."
-      - ./gradlew clean build -x test  # 테스트는 제외하고 빌드 수행
+
+      # Gradle 빌드 실행 (테스트는 생략)
+      - ./gradlew clean build -x test
+
+      # 빌드 결과물을 이름 변경해서 루트 디렉토리에 복사
+      # → CodeDeploy에서 접근 가능하도록 JAR 이름을 고정
+      - cp build/libs/backend-0.0.1-SNAPSHOT.jar newsummarize.jar
 
 artifacts:
   files:
-    # S3 또는 CodeDeploy로 전달할 파일 목록 지정
-    - build/libs/newsummarize.jar               # 빌드된 JAR 파일
-    - appspec.yml                    # CodeDeploy 배포 스크립트 정의 파일
-    - scripts/deploy.sh             # 배포 후 실행될 스크립트
+    # CodeDeploy에 전달할 파일 목록
+    - newsummarize.jar              # 실행할 스프링 부트 JAR
+    - appspec.yml                   # CodeDeploy 배포 설정
+    - scripts/deploy.sh            # EC2에서 실행할 배포 스크립트
 
-  discard-paths: yes                # 디렉토리 구조 제거 후 파일만 루트에 업로드
+  discard-paths: yes               # 경로 제거하고 루트에 파일만 저장 (S3 내부 구조 단순화)

@@ -1,17 +1,17 @@
-# CodeDeploy에서 사용하는 버전 명시 (고정값: 0.0)
+# CodeDeploy에서 사용하는 appspec 버전 (항상 0.0 고정)
 version: 0.0
 
-# 운영체제 정보 (리눅스 기반)
+# 운영체제 종류 (Amazon EC2는 리눅스 기반)
 os: linux
 
-# S3 또는 CodePipeline에서 받아온 아티팩트를 EC2의 어떤 경로에 복사할지 설정
+# S3 또는 CodePipeline에서 복사된 파일을 EC2의 어느 디렉토리에 배치할지 설정
 files:
-  - source: /                                # 배포 대상 루트 (zip 내 전체 파일)
-    destination: /home/ec2-user/newsummarize # EC2에서 압축을 풀고 복사할 경로
+  - source: /                                 # S3 zip 내 루트 전체를 대상
+    destination: /home/ec2-user/newsummarize  # EC2에서 파일이 풀리고 복사될 위치
 
-# 후처리 스크립트 실행을 위한 훅(hooks) 설정
+# 복사 후 어떤 작업을 수행할지 정의하는 훅(Hooks)
 hooks:
-  AfterInstall:                              # 파일 복사 후 실행할 작업 정의
-    - location: scripts/deploy.sh            # 실행할 쉘 스크립트 위치
-      timeout: 60                            # 실행 제한 시간 (초)
-      runas: ubuntu                          # 스크립트를 실행할 사용자 (EC2 사용자)
+  AfterInstall:                               # 파일 복사 직후 실행되는 단계
+    - location: scripts/deploy.sh             # 배포 실행 스크립트 경로
+      timeout: 60                             # 실행 제한 시간 (초)
+      runas: ubuntu                           # 이 스크립트를 실행할 EC2 사용자
