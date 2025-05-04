@@ -3,12 +3,20 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "[BUILD] Building the Spring Boot JAR..."
+      - echo "[BUILD] Cleaning and building..."
       - ./gradlew clean build -x test
+      - |
+        JAR_FILE=$(find build/libs -name "backend-0.0.1-SNAPSHOT.jar" | head -n 1)
+        echo "[BUILD] Found jar: $JAR_FILE"
+        if [ -f "$JAR_FILE" ]; then
+          cp "$JAR_FILE" backend-0.0.1-SNAPSHOT.jar
+        else
+          echo "[ERROR] JAR file not found!" && exit 1
+        fi
 
 artifacts:
   files:
-    - build/libs/backend-0.0.1-SNAPSHOT.jar
+    - backend-0.0.1-SNAPSHOT.jar
     - appspec.yml
     - scripts/deploy.sh
   discard-paths: yes

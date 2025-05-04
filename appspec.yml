@@ -2,15 +2,13 @@ version: 0.0
 os: linux
 
 files:
-  - source: build/libs/backend-0.0.1-SNAPSHOT.jar
-    destination: /home/ec2-user/newsummarize
-    overwrite: yes
+  - source: backend-0.0.1-SNAPSHOT.jar
+    destination: /home/ubuntu
   - source: scripts/deploy.sh
-    destination: /home/ec2-user/newsummarize/scripts
-    overwrite: yes
+    destination: /home/ubuntu/scripts
 
 hooks:
   AfterInstall:
     - location: scripts/deploy.sh
       timeout: 60
-      runas: ec2-user
+      runas: ubuntu

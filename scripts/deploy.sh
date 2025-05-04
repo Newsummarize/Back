@@ -2,13 +2,13 @@
 
 echo "🚀 [DEPLOY] 배포 스크립트 시작"
 
-APP_DIR=/home/ec2-user/newsummarize
+APP_DIR=/home/ubuntu
 JAR_NAME=backend-0.0.1-SNAPSHOT.jar
 JAR_PATH=$APP_DIR/$JAR_NAME
 LOG_FILE=$APP_DIR/nohup.out
 
 echo "🛑 [DEPLOY] 기존 실행 중인 Spring Boot 애플리케이션 종료 중..."
-pkill -f '.jar' || true
+pkill -f "$JAR_NAME" || true
 
 sleep 3
 
