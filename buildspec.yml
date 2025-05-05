@@ -16,6 +16,7 @@ phases:
       - cp appspec.yml .
       - mkdir -p scripts
       - cp scripts/deploy.sh scripts/deploy.sh
+      - chmod +x scripts/deploy.sh
 artifacts:
   files:
     - backend-0.0.1-SNAPSHOT.jar
