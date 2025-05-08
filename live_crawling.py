@@ -123,7 +123,7 @@ def crawl_news(category, max_articles=10):
             session.flush()
 
             article_list.append({
-                "news_id": news.news_id,
+                "news_id": news.news_id,  
                 "title": news.title,
                 "url": news.url,
                 "publisher": news.publisher,
@@ -132,6 +132,7 @@ def crawl_news(category, max_articles=10):
                 "content": news.content,
                 "image_url": news.image_url
             })
+
 
             id_url_list.append({
                 "news_id": news.news_id,
@@ -153,16 +154,18 @@ def crawl_news(category, max_articles=10):
 @app.route('/news', methods=['GET'])
 def get_news():
     category = request.args.get('category', default='all')
+    limit = int(request.args.get('limit', 10))  # default = 10 → 추천 시에는 2
 
     if category not in category_sections:
         return jsonify({"error": "잘못된 카테고리입니다."}), 400
 
-    data = crawl_news(category)
+    data = crawl_news(category, max_articles=limit)
     return jsonify({
         "category": category,
         "total": len(data),
         "articles": data
     })
+
 
 # ✅ 실행
 if __name__ == '__main__':

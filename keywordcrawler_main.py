@@ -1,8 +1,9 @@
 import json, datetime, urllib.request
 from newspaper import Article
-from sqlalchemy import create_engine, Column, Integer, Float, String, Text, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.mysql import LONGTEXT
 
 # DB 연결 설정
 DATABASE_URL = "mysql+pymysql://songsungmin:password0419@news-db.cjg2aaai646f.ap-northeast-2.rds.amazonaws.com:3306/newsdb"
@@ -21,11 +22,7 @@ class News(Base):
     category = Column(String(255), nullable=False)
     image_url = Column(String(500), nullable=False)
     content = Column(Text),
-    keyword_vector_1 = Column(Float),
-    keyword_vector_2 = Column(Float),
-    keyword_vector_3 = Column(Float),
-    keyword_vector_4 = Column(Float),
-    keyword_vector_5 = Column(Float)
+    content_vector = Column(LONGTEXT)
 
 # Naver API 설정
 naver_api_id = 'OFp3h0R6Rz6IjtoLR6HI'
@@ -74,11 +71,7 @@ def getItemData(item):
         'published_at': published_at.strftime('%Y-%m-%d %H:%M:%S'),
         'image_url': '',
         'content': None,
-        'keyword_vector_1': None,
-        'keyword_vector_2': None,
-        'keyword_vector_3': None,
-        'keyword_vector_4': None,
-        'keyword_vector_5': None
+        'content_vector': None
     }
 
 def setArticleInformation(before, after):
@@ -115,11 +108,7 @@ def setArticleInformation(before, after):
                 published_at=article['published_at'],
                 image_url=image_url,
                 content=None,
-                keyword_vector_1=None,
-                keyword_vector_2=None,
-                keyword_vector_3=None,
-                keyword_vector_4=None,
-                keyword_vector_5=None
+                content_vector=None
             )
             session.add(news)
             session.flush()

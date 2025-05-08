@@ -8,7 +8,7 @@ from keywordcrawler_trend import getOrCreateKeywordTrendImage
 app = Flask(__name__)
 
 # API 라우트
-@app.route('/api/search', methods=['GET'])
+@app.route('/search', methods=['GET'])
 def getKeywordNews():
     try:
         keyword = request.args.get('keyword', '')
@@ -36,7 +36,7 @@ def getKeywordNews():
             mimetype='application/json'
         )
 
-@app.route('/api/search/analytics', methods=['GET'])
+@app.route('/search/analytics', methods=['GET'])
 def getAnalyticData():
     try:
         keyword = request.args.get('keyword', '')
