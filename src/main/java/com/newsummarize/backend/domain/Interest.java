@@ -29,4 +29,8 @@ public class Interest {
     // - 중복을 방지하기 위해 unique 제약 포함
     @Column(name = "interest_category", nullable = false, unique = true)
     private String interestCategory;
+
+    @Column(nullable = false)
+    private boolean isDefault = false; // 초기 제공 관심사 여부
+
 }

@@ -25,6 +25,9 @@ public class MyPageResponse {
     // 사용자 성별 ("M", "F", "Other" 중 하나의 문자열)
     private String gender;
 
-    // 사용자의 관심사 목록 (문자열 리스트)
-    private List<String> interests;
+    // 초기 제공된 관심사
+    private List<String> defaultInterests;
+
+    // 사용자가 추가한 관심사
+    private List<String> customInterests;
 }

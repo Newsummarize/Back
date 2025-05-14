@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,8 +47,10 @@ public class UserService {
         Set<String> interestNames = request.getInterests();
         Set<Interest> interestEntities = interestNames.stream()
                 .map(name -> interestRepository.findByInterestCategory(name)
-                        .orElseThrow(() -> new RuntimeException("해당 관심사가 존재하지 않습니다: " + name)))
+                        .filter(Interest::isDefault)
+                        .orElseThrow(() -> new RuntimeException("해당 관심사는 회원가입 시 선택할 수 없습니다: " + name)))
                 .collect(Collectors.toSet());
+
 
         // 생년월일로부터 나이 계산
         LocalDate birthDate = LocalDate.of(request.getYear(), request.getMonth(), request.getDay());
@@ -83,16 +86,26 @@ public class UserService {
     // 마이페이지 사용자 정보 반환
     @Transactional(readOnly = true)
     public MyPageResponse getMyPage(User user) {
+        List<String> defaultInterests = user.getInterests().stream()
+                .filter(Interest::isDefault)
+                .map(Interest::getInterestCategory)
+                .toList();
+
+        List<String> customInterests = user.getInterests().stream()
+                .filter(interest -> !interest.isDefault())
+                .map(Interest::getInterestCategory)
+                .toList();
+
         return MyPageResponse.builder()
                 .userName(user.getUserName())
                 .email(user.getEmail())
                 .age(user.getAge())
                 .gender(user.getGender() != null ? user.getGender().name() : null)
-                .interests(user.getInterests().stream()
-                        .map(Interest::getInterestCategory)
-                        .toList())
+                .defaultInterests(defaultInterests)
+                .customInterests(customInterests)
                 .build();
     }
+
 
     // 관심사 추가
     @Transactional
@@ -101,14 +114,14 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        // 관심사가 존재하지 않으면 새로 생성
+        // 관심사 없으면 새로 생성 → 기본값은 isDefault = false
         Interest interest = interestRepository.findByInterestCategory(newCategory)
-                .orElseGet(() -> {
-                    Interest newInterest = Interest.builder()
-                            .interestCategory(newCategory)
-                            .build();
-                    return interestRepository.save(newInterest);
-                });
+                .orElseGet(() -> interestRepository.save(
+                        Interest.builder()
+                                .interestCategory(newCategory)
+                                .isDefault(false) // 나중에 사용자 정의로 추가된 관심사
+                                .build()
+                ));
 
         // 중복되지 않으면 추가
         if (!user.getInterests().contains(interest)) {
