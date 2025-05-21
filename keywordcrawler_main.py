@@ -21,7 +21,7 @@ class News(Base):
     published_at = Column(DateTime, nullable=False)
     category = Column(String(255), nullable=False)
     image_url = Column(String(500), nullable=False)
-    content = Column(Text),
+    content = Column(Text)
     content_vector = Column(LONGTEXT)
 
 # Naver API 설정
@@ -98,7 +98,7 @@ def setArticleInformation(before, after):
             if not category:
                 continue
 
-            image_url = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:image"]') or 'Imageless Article'
+            image_url = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:image"]') or ''
 
             news = News(
                 title=title,
