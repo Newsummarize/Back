@@ -1,7 +1,10 @@
 package com.newsummarize.backend.service;
 
 import com.newsummarize.backend.domain.News;
+import com.newsummarize.backend.dto.NumericalTrendResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -53,6 +56,32 @@ public class SearchService {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 throw new RuntimeException("내부 서버 호출 실패: " + response.getStatusCode());
             }
+            return response.getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("통신 중 에러 발생");
+        }
+    }
+
+    public NumericalTrendResponse getNumericalAnalyticData(String keyword, String period) {
+
+        if (!VALID_PERIODS.contains(period)) {
+            throw new IllegalArgumentException("기간(period)은 {daily, weekly, monthly} 중 하나여야 합니다.");
+        }
+
+        String flaskURL = "http://localhost:5006/search/analytics_num?keyword=" + keyword + "&period=" + period;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<NumericalTrendResponse> response = restTemplate.exchange(
+                    flaskURL,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<NumericalTrendResponse>() {}
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("내부 서버 호출 실패: " + response.getStatusCode());
+            }
+
             return response.getBody();
         } catch (Exception e) {
             throw new RuntimeException("통신 중 에러 발생");
