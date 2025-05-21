@@ -26,6 +26,7 @@ public class WebConfig {
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         // 모든 요청 헤더 허용
                         .allowedHeaders("*")
+                        .exposedHeaders("Authorization")
                         // 클라이언트에서 자격 증명(쿠키, Authorization 헤더 등)을 포함할 수 있도록 허용
                         .allowCredentials(true)
                         // preflight 요청 결과를 3600초(1시간) 동안 캐시 (OPTIONS 요청 최소화)

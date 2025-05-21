@@ -6,6 +6,10 @@ import com.newsummarize.backend.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.newsummarize.backend.domain.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import java.util.List;
 
@@ -33,16 +37,17 @@ public class NewsController {
     // [GET] /api/news/recommend
     // JWT 인증 기반으로 사용자 맞춤 뉴스 추천을 수행하는 API
     @GetMapping("/recommend")
-    public ResponseEntity<List<News>> recommend(@RequestHeader("Authorization") String authHeader) {
-        // "Bearer {token}" 형식에서 "Bearer " 제거하고 실제 토큰만 추출
-        String token = authHeader.replace("Bearer ", "");
+    public ResponseEntity<List<News>> recommend() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // 사용자 토큰을 기반으로 관심사에 맞는 뉴스 추천
-        List<News> news = newsService.getRecommendedNews(token);
+        if (!(auth.getPrincipal() instanceof User user)) {
+            return ResponseEntity.status(401).build();
+        }
 
-        // 추천된 뉴스 리스트를 200 OK 응답으로 반환
+        List<News> news = newsService.getRecommendation(user);
         return ResponseEntity.ok(news);
     }
+
 
     // [GET] /api/news/category?category=경제
     // 뉴스 카테고리(정치, 경제 등)를 기준으로 뉴스 리스트를 조회
