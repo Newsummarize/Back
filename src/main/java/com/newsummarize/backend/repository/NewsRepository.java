@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 // News 엔티티를 대상으로 기본 CRUD 및 사용자 정의 쿼리를 처리
@@ -22,4 +23,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // 3. 이미 저장된 뉴스의 URL만 모두 추출 (크롤링 중복 방지용)
     @Query("SELECT n.url FROM News n")
     Set<String> findAllUrls();
+
+    Optional<News> findByUrl(String url);
 }

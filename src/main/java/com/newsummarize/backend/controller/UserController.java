@@ -11,8 +11,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.newsummarize.backend.dto.ChangePasswordRequest;
+import java.util.Map;
+
+@CrossOrigin(origins = "https://newsummarize.com", allowedHeaders = "*")
 
 // REST API 컨트롤러임을 명시
 @RestController
@@ -27,9 +31,6 @@ public class UserController {
     // 사용자 관련 서비스 (마이페이지, 관심사, 비밀번호 등)
     private final UserService userService;
 
-    // 로그아웃 처리를 위한 인증 서비스
-    private final AuthService authService;
-
     // JWT 토큰 관련 유틸리티 (파싱, 검증)
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -39,7 +40,7 @@ public class UserController {
 
     // [GET] /api/users/me
     // 현재 로그인한 사용자의 마이페이지 정보 조회
-    @GetMapping("/me")
+    @GetMapping("/my")
     public ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(userService.getMyPage(user));
     }
@@ -76,15 +77,6 @@ public class UserController {
         String token = resolveToken(authHeader);
         userService.changePassword(token, request);
         return ResponseEntity.ok(new MessageResponse("비밀번호가 성공적으로 변경되었습니다."));
-    }
-
-    // [POST] /api/users/logout
-    // 로그아웃 요청 처리 (Redis에 토큰 저장하여 무효화)
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        String token = jwtTokenProvider.resolveToken(request);
-        authService.logout(token);
-        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     // [DELETE] /api/users
