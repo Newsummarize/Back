@@ -81,6 +81,22 @@ def getOrCreateKeywordTrendImage(keyword, period):
 
     return img_io
 
+def getNumercialTrendData(keyword, period):
+    json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
+    if not json_string:
+        data = None
+    else:
+        decoded = json.loads(json_string)
+        data = decoded['results'][0]['data']
+
+    result_dict = {
+        "keyword": keyword,
+        "period": period,
+        "results": data
+    }
+
+    return result_dict
+
 def getKeywordTrendRequestBody(keyword, period):
     match period:
         case "daily":
