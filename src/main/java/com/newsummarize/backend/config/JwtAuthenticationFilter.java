@@ -33,8 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/news/category",
             "/api/news/main",
             "/api/search",
-            "/api/search/analytics"
-
+            "/api/search/analytics",
+            "/api/search/analytics_num"
     );
 
     @Override
