@@ -2,8 +2,8 @@ import json
 from flask_cors import CORS
 from flask import Flask, request, Response
 
-from keywordcrawler_main import getArticle
-from keywordcrawler_trend import getOrCreateKeywordTrendImage, getNumercialTrendData
+from python_modules.keywordcrawler_main import getArticle
+from python_modules.keywordcrawler_trend import getOrCreateKeywordTrendImage, getNumercialTrendData
 
 # Flask App 설정
 app = Flask(__name__)
