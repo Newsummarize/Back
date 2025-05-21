@@ -2,6 +2,7 @@ import json
 import datetime
 import urllib.request
 from flask import Flask, request, Response
+from flask_cors import CORS
 from newspaper import Article
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -9,6 +10,9 @@ from sqlalchemy.orm import sessionmaker
 
 # Flask App 설정
 app = Flask(__name__)
+
+# CORS 설정
+CORS(app, origins=["http://localhost:5173", "https://newsummarize.com"], supports_credentials=True)
 
 # DB 연결 정보
 DATABASE_URL = "mysql+pymysql://songsungmin:password0419@news-db.cjg2aaai646f.ap-northeast-2.rds.amazonaws.com:3306/newsdb"
@@ -100,17 +104,24 @@ def setArticleInformation(before, after, keyword):
             articleOriginal.download()
             articleOriginal.parse()
 
-            articleTitle = articleOriginal.extractor.get_meta_content(doc=articleOriginal.clean_doc, metaname='meta[property="og:title"]')
+            articleTitle = articleOriginal.extractor.get_meta_content(
+                doc=articleOriginal.clean_doc, metaname='meta[property="og:title"]')
             if not articleTitle:
                 continue
 
-            siteName = articleOriginal.extractor.get_meta_content(doc=articleOriginal.clean_doc, metaname='meta[property="og:site_name"]')
-            copyright = articleOriginal.extractor.get_meta_content(doc=articleOriginal.clean_doc, metaname='meta[name="Copyright"]')
+            siteName = articleOriginal.extractor.get_meta_content(
+                doc=articleOriginal.clean_doc, metaname='meta[property="og:site_name"]')
+            copyright = articleOriginal.extractor.get_meta_content(
+                doc=articleOriginal.clean_doc, metaname='meta[name="Copyright"]')
             publisher = siteName or copyright
             if not publisher:
                 continue
 
-            articleImageURL = articleOriginal.extractor.get_meta_content(doc=articleOriginal.clean_doc, metaname='meta[property="og:image"]') or 'Imageless Article'
+            articleImageURL = articleOriginal.extractor.get_meta_content(
+                doc=articleOriginal.clean_doc, metaname='meta[property="og:image"]') or ''
+
+            # 본문 텍스트 크롤링 추가
+            content = articleOriginal.text.strip()
 
             news = News(
                 title=articleTitle,
@@ -119,16 +130,18 @@ def setArticleInformation(before, after, keyword):
                 publisher=publisher,
                 published_at=article['published_at'],
                 image_url=articleImageURL,
-                content=None
+                content=content  # 본문 저장
             )
             session.add(news)
             session.flush()
 
+            # 반환 데이터에 content 포함 (선택)
             article['news_id'] = news.news_id
             article['title'] = articleTitle
             article['category'] = keyword
             article['publisher'] = publisher
             article['image_url'] = articleImageURL
+            article['content'] = content
 
             after.append(article)
 
@@ -138,6 +151,7 @@ def setArticleInformation(before, after, keyword):
 
     session.commit()
     session.close()
+
 
 # ✅ 추천 뉴스 API
 @app.route('/api/news/recommend', methods=['GET'])
