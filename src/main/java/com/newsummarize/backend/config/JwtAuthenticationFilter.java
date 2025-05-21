@@ -39,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/news/category", "/api/news/category/",
             "/api/news/main", "/api/news/main/",
             "/api/search", "/api/search/",
-            "/api/search/analytics", "/api/search/analytics/"
+            "/api/search/analytics", "/api/search/analytics/",
+            "/api/search/analytics_num", "/api/search/analytics_num/"
             );
 
     // 요청 경로가 예외 목록에 포함되면 필터를 건너뛰도록 설정

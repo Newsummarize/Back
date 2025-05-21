@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/api/news/main",
                                 "/api/search",
                                 "/api/search/analytics",
+                                "/api/search/analytics_num",
 
                                 // Swagger 관련 경로 허용
                                 "/swagger-ui/**",
