@@ -70,8 +70,7 @@ def getItemData(item):
         'publisher': '',
         'published_at': published_at.strftime('%Y-%m-%d %H:%M:%S'),
         'image_url': '',
-        'content': None,
-        'content_vector': None
+        'content': None
     }
 
 def setArticleInformation(before, after):
@@ -100,6 +99,8 @@ def setArticleInformation(before, after):
 
             image_url = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:image"]') or ''
 
+            content, content_vector = getSummaryAndVector(parsed.text)
+
             news = News(
                 title=title,
                 url=article['url'],
@@ -107,8 +108,8 @@ def setArticleInformation(before, after):
                 publisher=site,
                 published_at=article['published_at'],
                 image_url=image_url,
-                content=None,
-                content_vector=None
+                content=content,
+                content_vector=content_vector
             )
             session.add(news)
             session.flush()
@@ -118,7 +119,8 @@ def setArticleInformation(before, after):
                 'title': title,
                 'category': category,
                 'publisher': site,
-                'image_url': image_url
+                'image_url': image_url,
+                'content': content
             })
             after.append(article)
         except Exception as e:
@@ -126,3 +128,24 @@ def setArticleInformation(before, after):
             continue
     session.commit()
     session.close()
+
+def getSummaryAndVector(article_content):
+    url = 'http://127.0.0.1:5011/ai/subsummary'
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    data = {
+        'article': article_content
+    }
+    data = json.dumps(data).encode('utf-8')
+
+    try:
+        req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+
+        with urllib.request.urlopen(req) as response:
+            response_data = json.loads(response.read().decode('utf-8'))
+            return response_data.get('content'), json.dumps(response_data.get('vector'))
+
+    except urllib.error.URLError:
+        return None, None
