@@ -99,6 +99,8 @@ def setArticleInformation(before, after):
 
             image_url = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:image"]') or ''
 
+            if not parsed.text:
+                continue
             content, content_vector = getSummaryAndVector(parsed.text)
 
             news = News(
@@ -124,7 +126,7 @@ def setArticleInformation(before, after):
             })
             after.append(article)
         except Exception as e:
-            print(f">>> [Error]: Skipped article <{article['title']}> due to error:", e)
+            print(f">>> [Error]: Skipped article due to error:", e)
             continue
     session.commit()
     session.close()
@@ -149,3 +151,4 @@ def getSummaryAndVector(article_content):
 
     except urllib.error.URLError:
         return None, None
+    
