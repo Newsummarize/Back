@@ -2,6 +2,7 @@ package com.newsummarize.backend.service;
 
 import com.newsummarize.backend.domain.News;
 import com.newsummarize.backend.dto.NumericalTrendResponse;
+import com.newsummarize.backend.dto.TimelineResponse;
 import com.newsummarize.backend.error.exception.InternalFlaskErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -60,6 +61,21 @@ public class SearchService {
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<NumericalTrendResponse>() {}
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful())
+            throw new InternalFlaskErrorException("내부 서버 호출 실패: " + response.getStatusCode());
+
+        return response.getBody();
+    }
+
+    public TimelineResponse getTimelineOfKeyword(String keyword) {
+        String flaskURL = "http://127.0.0.1:5011/search/timeline?keyword=" + keyword;
+        ResponseEntity<TimelineResponse> response = restTemplate.exchange(
+                flaskURL,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<TimelineResponse>() {}
         );
 
         if (!response.getStatusCode().is2xxSuccessful())

@@ -2,6 +2,7 @@ package com.newsummarize.backend.controller;
 
 import com.newsummarize.backend.domain.News;
 import com.newsummarize.backend.dto.NumericalTrendResponse;
+import com.newsummarize.backend.dto.TimelineResponse;
 import com.newsummarize.backend.error.exception.InvalidRequestParameterException;
 import com.newsummarize.backend.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -63,5 +64,15 @@ public class SearchController {
 
         NumericalTrendResponse trend_data = searchService.getNumericalAnalyticData(keyword, period);
         return ResponseEntity.ok().body(trend_data);
+    }
+
+    @GetMapping("/timeline")
+    public ResponseEntity<TimelineResponse> generateKeywordTimeline(@RequestParam String keyword) {
+
+        if (keyword == null || keyword.trim().isEmpty())
+            throw new InvalidRequestParameterException("검색어(keyword)가 필요합니다.");
+
+        TimelineResponse timeline_data = searchService.getTimelineOfKeyword(keyword);
+        return ResponseEntity.ok().body(timeline_data);
     }
 }
