@@ -47,7 +47,7 @@ def search_articles_vectorized(keyword, session, top_n=10, threshold=0.4):
             continue
     
     top_articles = [item for _, item in sorted(heap, key=lambda x: x[0], reverse=True)]
-    top_articles.sort(key=lambda x: x[1].published_at)
+    top_articles.sort(key=lambda x: x.published_at)
 
     return top_articles
 
@@ -66,11 +66,11 @@ def generate_timeline(keyword):
             'keyword': keyword,
             'total': len(top_results),
             'events': [{
-                "news_id": a[1][0],
-                "title": a[1][1],
-                "published_at": a[1][2].isoformat(),
-                "content": a[1][3]
-            } for a in top_results]
+                "id": a[0],
+                "title": a[1],
+                "publishedAt": a[2].isoformat(),
+                "content": a[3]
+            } for a in top_results] if top_results else []
         }
     except Exception as e:
         print(f"[Log] timeliner stopped because: {e}")
