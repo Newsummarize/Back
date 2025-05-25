@@ -14,21 +14,11 @@ def generateKeywordTimeline():
     try:
         keyword = request.args.get('keyword', '')
         result_articles = generate_timeline(keyword)
-        if not result_articles:
-            return Response(
-                response = json.dumps({
-                    "keyword": keyword,
-                    "description": f"키워드 \"{keyword}\"에 대한 타임라인을 생성할 기사가 부족합니다."
-                }, ensure_ascii=False),
-                status=200,
-                mimetype='application/json'
-            )
-        else:
-            return Response(
-                response = json.dumps(result_articles, ensure_ascii=False),
-                status=200,
-                mimetype='application/json'
-            )
+        return Response(
+            response = json.dumps(result_articles, ensure_ascii=False),
+            status=200,
+            mimetype='application/json'
+        )
     except Exception as e:
         return Response(
             response=json.dumps({'error': '서버 내부에 문제가 발생했습니다.'}, ensure_ascii=False, indent=4),
@@ -43,7 +33,7 @@ def generateArticleSummary():
         article = request.get_json().get('article')
         content = summarize_text(article)
         if not content:
-            raise Exception("요약 내용 없음")
+            raise Exception("요약 생성 비정상 종료")
         resp = {
             'content': content,
             'vector': encode_text(content).tolist()
