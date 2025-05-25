@@ -84,7 +84,7 @@ def getOrCreateKeywordTrendImage(keyword, period):
 def getNumercialTrendData(keyword, period):
     json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
     if not json_string:
-        data = None
+        data = []
     else:
         decoded = json.loads(json_string)
         data = decoded['results'][0]['data']
