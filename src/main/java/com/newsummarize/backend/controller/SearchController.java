@@ -45,6 +45,10 @@ public class SearchController {
             throw new InvalidRequestParameterException("기간(period)은 {daily, weekly, monthly} 중 하나여야 합니다.");
 
         byte[] trend_image = searchService.getKeywordTrendImage(keyword, period);
+        if (trend_image == null)
+            return ResponseEntity.
+                    noContent().
+                    build();
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(trend_image);

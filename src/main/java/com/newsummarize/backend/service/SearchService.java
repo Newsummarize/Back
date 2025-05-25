@@ -7,6 +7,7 @@ import com.newsummarize.backend.error.exception.InternalFlaskErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -50,6 +51,9 @@ public class SearchService {
 
         if (!response.getStatusCode().is2xxSuccessful())
             throw new InternalFlaskErrorException("내부 서버 호출 실패: " + response.getStatusCode());
+
+        if (response.getStatusCode() == HttpStatus.NO_CONTENT)
+            return null;
 
         return response.getBody();
     }
