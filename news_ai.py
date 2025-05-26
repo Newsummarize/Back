@@ -31,6 +31,8 @@ def generateArticleSummary():
     try:
         print(f"[{datetime.datetime.now()}] 처리 시작")
         article = request.get_json().get('article')
+        if not article:
+            raise AttributeError("내용 없는 기사")
         content = summarize_text(article)
         if not content:
             raise Exception("요약 생성 비정상 종료")
