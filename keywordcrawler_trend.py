@@ -29,57 +29,60 @@ naver_api_id = "OFp3h0R6Rz6IjtoLR6HI"
 naver_api_secret = "Q2AzgNx6Pq"
 
 def getOrCreateKeywordTrendImage(keyword, period):
-    session = Session()
-    keyword_entry = session.query(Keyword).filter_by(
-        keyword_text=keyword,
-        period=period
-    ).first()
-
-    now = datetime.datetime.now()
-    expiry_days = {
-        'daily': 1,
-        'weekly': 7,
-        'monthly': 30
-    }
-
-    image_filename = f"/home/ubuntu/trend_images/{keyword}_{period}.png"
-    if keyword_entry and (keyword_entry.trend_image == image_filename):
-        delta = now - keyword_entry.updated_at
-        if delta.days <= expiry_days[period]:
-            try:
-                with open(keyword_entry.trend_image, 'rb') as f:
-                    img_io = io.BytesIO(f.read())
-                    img_io.seek(0)
-                    session.close()
-                    return img_io
-            except FileNotFoundError:
-                pass
-
-    json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
-    if not json_string:
-        session.close()
-        return None
-
-    img_io, file_path = generateVisualTrendImage(json_string, image_filename)
-
-    if keyword_entry:
-        keyword_entry.trend_image = file_path
-        keyword_entry.updated_at = now
-    else:
-        keyword_entry = Keyword(
+    try:
+        session = Session()
+        keyword_entry = session.query(Keyword).filter_by(
             keyword_text=keyword,
-            period=period,
-            trend_image=file_path,
-            created_at=now,
-            updated_at=now,
-            ai_summary=None
-        )
-        session.add(keyword_entry)
+            period=period
+        ).first()
 
-    session.commit()
-    session.close()
+        now = datetime.datetime.now()
+        expiry_days = {
+            'daily': 1,
+            'weekly': 7,
+            'monthly': 30
+        }
 
-    return img_io
+        image_filename = f"/home/ubuntu/trend_images/{keyword}_{period}.png"
+        if keyword_entry and (keyword_entry.trend_image == image_filename):
+            delta = now - keyword_entry.updated_at
+            if delta.days <= expiry_days[period]:
+                try:
+                    with open(keyword_entry.trend_image, 'rb') as f:
+                        img_io = io.BytesIO(f.read())
+                        img_io.seek(0)
+                        return img_io
+                except FileNotFoundError:
+                    pass
+
+        json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
+        if not json_string:
+            return None
+
+        img_io, file_path = generateVisualTrendImage(json_string, image_filename)
+        if not img_io or not file_path:
+            return None
+
+        if keyword_entry:
+            keyword_entry.trend_image = file_path
+            keyword_entry.updated_at = now
+        else:
+            keyword_entry = Keyword(
+                keyword_text=keyword,
+                period=period,
+                trend_image=file_path,
+                created_at=now,
+                updated_at=now,
+                ai_summary=None
+            )
+            session.add(keyword_entry)
+
+        session.commit()
+
+        return img_io
+    finally:
+        session.close()
+
 
 def getNumercialTrendData(keyword, period):
     json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
