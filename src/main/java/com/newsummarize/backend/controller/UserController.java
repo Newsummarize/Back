@@ -2,10 +2,7 @@
 package com.newsummarize.backend.controller;
 
 import com.newsummarize.backend.config.JwtTokenProvider;
-import com.newsummarize.backend.domain.User;
-import com.newsummarize.backend.dto.InterestRequest;
 import com.newsummarize.backend.dto.MyPageResponse;
-import com.newsummarize.backend.service.AuthService;
 import com.newsummarize.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +11,16 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.newsummarize.backend.dto.ChangePasswordRequest;
-import java.util.Map;
+import com.newsummarize.backend.domain.User;
+import com.newsummarize.backend.repository.UserRepository;
+
+
 
 @CrossOrigin(origins = "https://newsummarize.com", allowedHeaders = "*")
 
 // REST API 컨트롤러임을 명시
 @RestController
+
 
 // 생성자 주입을 위한 Lombok 어노테이션
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class UserController {
 
     // JWT 토큰 관련 유틸리티 (파싱, 검증)
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     // 응답 메시지를 담기 위한 간단한 레코드 클래스
     record MessageResponse(String message) {
@@ -41,9 +43,37 @@ public class UserController {
     // [GET] /api/users/me
     // 현재 로그인한 사용자의 마이페이지 정보 조회
     @GetMapping("/my")
-    public ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(userService.getMyPage(user));
+    public ResponseEntity<MyPageResponse> getMyPage() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            System.out.println("❌ 인증되지 않은 사용자");
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = auth.getName();
+        System.out.println("✅ 현재 사용자 이메일: " + email);
+
+        User user = userRepository.findWithInterestsByEmail(email)
+                .orElseThrow(() -> new RuntimeException("❌ 사용자 정보 없음"));
+
+        System.out.println("✅ 사용자 DB 조회 성공: " + user.getUserName());
+
+        MyPageResponse response = userService.getMyPage(user);
+        System.out.println("✅ 마이페이지 응답 생성 완료");
+
+        return ResponseEntity.ok(response);
     }
+
+
+
+
+
+
+
+
+
+
+
 
     // [POST] /api/users/interests
     // 관심사 추가 (토큰 기반 사용자 식별)

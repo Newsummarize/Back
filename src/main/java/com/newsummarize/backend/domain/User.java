@@ -31,7 +31,8 @@ public class User {
 
     // 사용자 나이 (nullable)
     @Column(nullable = true)
-    private int age;
+    private int age
+            ;
 
     // 생년월일 (LocalDate 타입 사용, nullable)
     @Column(name = "birth_date")
