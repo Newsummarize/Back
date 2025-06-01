@@ -96,6 +96,14 @@ public class UserService {
                 .map(Interest::getInterestCategory)
                 .toList();
 
+        // birthDate에서 연, 월, 일 추출
+        int year = 0, month = 0, day = 0;
+        if (user.getBirthDate() != null) {
+            year = user.getBirthDate().getYear();
+            month = user.getBirthDate().getMonthValue();
+            day = user.getBirthDate().getDayOfMonth();
+        }
+
         return MyPageResponse.builder()
                 .userName(user.getUserName())
                 .email(user.getEmail())
@@ -103,8 +111,12 @@ public class UserService {
                 .gender(user.getGender() != null ? user.getGender().name() : null)
                 .defaultInterests(defaultInterests)
                 .customInterests(customInterests)
+                .year(year)
+                .month(month)
+                .day(day)
                 .build();
     }
+
 
 
     // 관심사 추가
