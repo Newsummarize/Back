@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.mysql import LONGTEXT
+from sqlalchemy.exc import SQLAlchemyError
 
 # DB 연결 설정
 DATABASE_URL = "mysql+pymysql://songsungmin:password0419@news-db.cjg2aaai646f.ap-northeast-2.rds.amazonaws.com:3306/newsdb"
@@ -79,28 +80,40 @@ def setArticleInformation(before, after):
         try:
             if len(after) == 6:
                 break
+
+            existing_article = session.query(News).filter(News.url == article['url']).first()
             
+            if existing_article:
+                article.update({
+                    'news_id': len(after) + 1,
+                    'title': existing_article.title,
+                    'category': existing_article.category,
+                    'publisher': existing_article.publisher,
+                    'image_url': existing_article.image_url,
+                    'content': existing_article.content
+                })
+                after.append(article)
+                continue
+
             parsed = Article(article['url'], language='ko')
             parsed.download()
+            
+            if not isValidArticle(parsed):
+                continue
+
             parsed.parse()
+            meta = parsed.extractor.get_meta_content
+            doc = parsed.clean_doc
 
-            title = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:title"]')
-            if not title:
+            title = meta(doc=doc, metaname='meta[property="og:title"]')
+            site = meta(doc=doc, metaname='meta[property="og:site_name"]') or meta(doc=doc, metaname='meta[name="Copyright"]')
+            category = meta(doc=doc, metaname='meta[property="article:section"]')
+            image_url = meta(doc=doc, metaname='meta[property="og:image"]') or ''
+            text = parsed.text
+
+            if not all([title, site, category, text]):
                 continue
 
-            site = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:site_name"]') or \
-                   parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[name="Copyright"]')
-            if not site:
-                continue
-
-            category = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="article:section"]')
-            if not category:
-                continue
-
-            image_url = parsed.extractor.get_meta_content(doc=parsed.clean_doc, metaname='meta[property="og:image"]') or ''
-
-            if not parsed.text:
-                continue
             content, content_vector = getSummaryAndVector(parsed.text)
 
             news = News(
@@ -115,9 +128,10 @@ def setArticleInformation(before, after):
             )
             session.add(news)
             session.flush()
+            session.commit()
 
             article.update({
-                'news_id': news.news_id,
+                'news_id': len(after) + 1,
                 'title': title,
                 'category': category,
                 'publisher': site,
@@ -126,9 +140,11 @@ def setArticleInformation(before, after):
             })
             after.append(article)
         except Exception as e:
-            print(f">>> [Error]: Skipped article due to error:", e)
+            if isinstance(e, SQLAlchemyError):
+                session.rollback()
+            print(f">>> [Error]: {e}")
             continue
-    session.commit()
+
     session.close()
 
 def getSummaryAndVector(article_content):
@@ -150,5 +166,19 @@ def getSummaryAndVector(article_content):
             return response_data.get('content'), json.dumps(response_data.get('vector'))
 
     except urllib.error.URLError:
-        return None, None
-    
+        return "기사의 요약 내용이 없습니다.", None
+
+def isValidArticle(parsed):
+    raw_html = parsed.html
+            
+    if not raw_html:
+        return False
+
+    has_title = 'og:title' in raw_html
+    has_section = 'article:section' in raw_html
+    has_site_or_copyright = ('og:site_name' in raw_html) or ('Copyright' in raw_html)
+
+    if not (has_title and has_section and has_site_or_copyright):
+        return False
+
+    return True
