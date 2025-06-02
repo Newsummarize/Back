@@ -5,8 +5,9 @@ from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from python_modules.summarizer import summarize_text
 from python_modules.vectorizer import encode_text
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 DATABASE_URL = "mysql+pymysql://songsungmin:password0419@news-db.cjg2aaai646f.ap-northeast-2.rds.amazonaws.com:3306/newsdb"
 engine = create_engine(DATABASE_URL, echo=True)
@@ -34,7 +35,7 @@ def search_articles_vectorized(keyword, session, top_n=10, threshold=0.4):
         News.news_id, News.title, News.published_at, News.content, News.content_vector
     ).filter(
         News.content_vector.isnot(None)
-    ).yield_per(100):
+    ).yield_per(50):
         try:
             article_vector = np.array(json.loads(record.content_vector), dtype=np.float32)
             similarity = compute_similarity(query_vector, article_vector)
@@ -52,8 +53,8 @@ def search_articles_vectorized(keyword, session, top_n=10, threshold=0.4):
     return top_articles
 
 def compute_similarity(query_vector, doc_vector):
-    query_tensor = torch.tensor(query_vector, dtype=torch.float32)
-    doc_tensor = torch.tensor(doc_vector, dtype=torch.float32)
+    query_tensor = torch.tensor(query_vector, dtype=torch.float32).to(device)
+    doc_tensor = torch.tensor(doc_vector, dtype=torch.float32).to(device)
     return torch.nn.functional.cosine_similarity(query_tensor, doc_tensor, dim=0).item()
 
 def generate_timeline(keyword):
