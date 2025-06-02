@@ -1,10 +1,9 @@
 import json, datetime, io
 import urllib.request
 import matplotlib.pyplot as plt
-from sqlalchemy import create_engine, Column, Integer, Text, VARCHAR, DateTime, UniqueConstraint
+from sqlalchemy import create_engine, Column, Integer, Text, VARCHAR, DateTime, UniqueConstraint, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql import func
 
 DATABASE_URL = "mysql+pymysql://songsungmin:password0419@news-db.cjg2aaai646f.ap-northeast-2.rds.amazonaws.com:3306/newsdb"
 engine = create_engine(DATABASE_URL, echo=True)
@@ -17,9 +16,11 @@ class Keyword(Base):
     keyword_text = Column(VARCHAR(255), unique=True)
     period = Column(VARCHAR(10), nullable=False, default='daily')
     trend_image = Column(VARCHAR(1000))
+    trend_image_updated_at = Column(DateTime, nullable=True)
+    trend_data_json = Column(Text)
+    trend_data_updated_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    ai_summary = Column(Text)
     
     __table_args__ = (
         UniqueConstraint('keyword_text', 'period', name='_keyword_period_uc'),
@@ -45,7 +46,7 @@ def getOrCreateKeywordTrendImage(keyword, period):
 
         image_filename = f"/home/ubuntu/trend_images/{keyword}_{period}.png"
         if keyword_entry and (keyword_entry.trend_image == image_filename):
-            delta = now - keyword_entry.updated_at
+            delta = now - keyword_entry.trend_image_updated_at
             if delta.days <= expiry_days[period]:
                 try:
                     with open(keyword_entry.trend_image, 'rb') as f:
@@ -65,15 +66,13 @@ def getOrCreateKeywordTrendImage(keyword, period):
 
         if keyword_entry:
             keyword_entry.trend_image = file_path
-            keyword_entry.updated_at = now
+            keyword_entry.trend_image_updated_at = now
         else:
             keyword_entry = Keyword(
                 keyword_text=keyword,
                 period=period,
                 trend_image=file_path,
-                created_at=now,
-                updated_at=now,
-                ai_summary=None
+                trend_image_updated_at=now
             )
             session.add(keyword_entry)
 
@@ -85,20 +84,65 @@ def getOrCreateKeywordTrendImage(keyword, period):
 
 
 def getNumercialTrendData(keyword, period):
-    json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
-    if not json_string:
-        data = []
-    else:
+    try:
+        session = Session()
+        keyword_entry = session.query(Keyword).filter_by(
+            keyword_text=keyword,
+            period=period
+        ).first()
+
+        now = datetime.datetime.now()
+        expiry_days = {
+            'daily': 1,
+            'weekly': 7,
+            'monthly': 30
+        }
+
+        if keyword_entry and keyword_entry.trend_data_json:
+            delta = now - keyword_entry.trend_data_updated_at
+            if delta.days <= expiry_days[period]:
+                try:
+                    decoded = json.loads(keyword_entry.trend_data_json)
+                    return {
+                        "keyword": keyword,
+                        "period": period,
+                        "results": decoded
+                    }
+                except json.JSONDecodeError:
+                    pass
+
+        json_string = getNaverDataLab(getKeywordTrendRequestBody(keyword, period))
+        if not json_string:
+            return {
+                "keyword": keyword,
+                "period": period,
+                "results": []
+            }
+
         decoded = json.loads(json_string)
         data = decoded['results'][0]['data']
 
-    result_dict = {
-        "keyword": keyword,
-        "period": period,
-        "results": data
-    }
+        if keyword_entry:
+            keyword_entry.trend_data_json = json.dumps(data, ensure_ascii=False)
+            keyword_entry.trend_data_updated_at = now
+        else:
+            keyword_entry = Keyword(
+                keyword_text=keyword,
+                period=period,
+                trend_data_json=json.dumps(data, ensure_ascii=False),
+                trend_data_updated_at=now
+            )
+            session.add(keyword_entry)
 
-    return result_dict
+        session.commit()
+
+        return {
+            "keyword": keyword,
+            "period": period,
+            "results": data
+        }
+    finally:
+        session.close()
 
 def getKeywordTrendRequestBody(keyword, period):
     match period:
@@ -117,7 +161,7 @@ def getKeywordTrendRequestBody(keyword, period):
     startDate = (datetime.datetime.today() - datetime.timedelta(days=period_day)).strftime("%Y-%m-%d")
     endDate = datetime.datetime.today().strftime("%Y-%m-%d")
 
-    body_dict = {
+    return {
         "startDate": startDate,
         "endDate": endDate,
         "timeUnit": timeUnit,
@@ -128,8 +172,6 @@ def getKeywordTrendRequestBody(keyword, period):
             }
         ]
     }
-
-    return body_dict
 
 def getNaverDataLab(body):
     req = urllib.request.Request("https://openapi.naver.com/v1/datalab/search")
