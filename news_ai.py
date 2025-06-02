@@ -54,5 +54,13 @@ def generateArticleSummary():
             mimetype='application/json'
         )
 
+@app.route('/news_ai/test', methods=['GET'])
+def test():
+    return Response(
+        response=json.dumps({'reponse': 'ok'}, ensure_ascii=False, indent=4),
+        status=200,
+        mimetype='application/json'
+    )
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5011, debug=True)

@@ -71,6 +71,15 @@ def getNumericalAnalyticData():
             mimetype='application/json'
         )
 
+
+@app.route('/kwc/test', methods=['GET'])
+def test():
+    return Response(
+        response=json.dumps({'reponse': 'ok'}, ensure_ascii=False, indent=4),
+        status=200,
+        mimetype='application/json'
+    )
+
 # Flask 실행
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5006, debug=True)
