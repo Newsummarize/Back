@@ -50,17 +50,15 @@ public class UserController {
             return ResponseEntity.status(401).build();
         }
 
-        String email = auth.getName();
-        System.out.println("✅ 현재 사용자 이메일: " + email);
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof User user)) {
+            System.out.println("❌ Principal이 User 타입이 아님: " + principal);
+            return ResponseEntity.status(401).build();
+        }
 
-        User user = userRepository.findWithInterestsByEmail(email)
-                .orElseThrow(() -> new RuntimeException("❌ 사용자 정보 없음"));
-
-        System.out.println("✅ 사용자 DB 조회 성공: " + user.getUserName());
+        System.out.println("✅ 현재 사용자 이메일: " + user.getEmail());
 
         MyPageResponse response = userService.getMyPage(user);
-        System.out.println("✅ 마이페이지 응답 생성 완료");
-
         return ResponseEntity.ok(response);
     }
 
