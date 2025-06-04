@@ -67,8 +67,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/news/recommend").authenticated()
 
 
-
-
                         // 프리플라이트 OPTIONS 요청 허용 (CORS)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
