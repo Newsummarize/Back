@@ -64,6 +64,9 @@ public class SecurityConfig {
                         // 사용자 정보 조회는 로그인 필요
                         .requestMatchers(HttpMethod.GET, "/api/users/my").authenticated()
 
+                        // 로그인된 사용자만 접근 가능
+                        .requestMatchers(HttpMethod.GET, "/api/news/recommend").authenticated()
+
 
                         // 프리플라이트 OPTIONS 요청 허용 (CORS)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

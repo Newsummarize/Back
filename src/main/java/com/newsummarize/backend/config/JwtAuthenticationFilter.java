@@ -82,7 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userRepository.findWithInterestsByEmail(email)
                         .orElseThrow(() -> new UsernameNotFoundException("사용자 없음"));
 
-                // ✅ Spring Security 기본 User 객체 사용
+                // Spring Security 기본 User 객체 사용
                 org.springframework.security.core.userdetails.User springUser =
                         new org.springframework.security.core.userdetails.User(
                                 user.getEmail(),
@@ -92,7 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
-                                user.getEmail(),
+                                user,
                                 null,
                                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
                         );

@@ -49,6 +49,7 @@ public class NewsController {
     }
 
 
+
     // [GET] /api/news/category?category=경제
     // 뉴스 카테고리(정치, 경제 등)를 기준으로 뉴스 리스트를 조회
     @GetMapping("/category")
