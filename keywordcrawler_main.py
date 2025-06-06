@@ -166,7 +166,7 @@ def getSummaryAndVector(article_content):
             return response_data.get('content'), json.dumps(response_data.get('vector'))
 
     except urllib.error.URLError:
-        return "기사의 요약 내용이 없습니다.", None
+        return None, None
 
 def isValidArticle(parsed):
     raw_html = parsed.html
