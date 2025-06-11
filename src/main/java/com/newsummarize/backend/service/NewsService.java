@@ -84,11 +84,19 @@ public class NewsService {
         ExecutorService executor = Executors.newFixedThreadPool(6);
 
         try {
+            Set<String> usedCategories = new HashSet<>();
             List<String> shuffledInterests = new ArrayList<>(allInterests);
             Collections.shuffle(shuffledInterests);
-            List<String> initialSelected = shuffledInterests.stream().limit(2).toList();
 
-            List<CompletableFuture<News>> initialFutures = initialSelected.stream()
+            // 최대 4개 선택 (관심사 개수보다 작을 수도 있음)
+            List<String> selectedCategories = shuffledInterests.stream()
+                    .limit(Math.min(4, shuffledInterests.size()))
+                    .toList();
+
+            usedCategories.addAll(selectedCategories);
+
+            // 우선 관심사 기반 비동기 요청
+            List<CompletableFuture<News>> initialFutures = selectedCategories.stream()
                     .map(category -> CompletableFuture.supplyAsync(() -> fetchAndSaveQuickNews(category, restTemplate), executor))
                     .toList();
 
@@ -99,15 +107,20 @@ public class NewsService {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            if (recommended.size() < 2) {
-                for (String category : shuffledInterests) {
-                    if (initialSelected.contains(category)) continue;
+            // 부족할 경우 추가 채우기
+            List<String> fallbackPool = new ArrayList<>(Set.of(
+                    "정치", "경제", "사회", "생활/문화", "세계", "IT/과학"
+            ));
+            Collections.shuffle(fallbackPool);
 
-                    News news = fetchAndSaveQuickNews(category, restTemplate);
-                    if (news != null) {
-                        recommended.add(news);
-                        if (recommended.size() == 2) break;
-                    }
+            for (String fallback : fallbackPool) {
+                if (recommended.size() >= 4) break;
+                if (usedCategories.contains(fallback)) continue;
+
+                News news = fetchAndSaveQuickNews(fallback, restTemplate);
+                if (news != null) {
+                    recommended.add(news);
+                    usedCategories.add(fallback);
                 }
             }
 
@@ -117,6 +130,7 @@ public class NewsService {
             executor.shutdown();
         }
     }
+
 
     // 빠르게 크롤링하고 DB에 저장까지 하는 함수
     @Transactional
