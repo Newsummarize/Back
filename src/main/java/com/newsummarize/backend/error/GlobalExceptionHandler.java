@@ -15,16 +15,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRequestKeywordException(InvalidRequestParameterException e) {
-        System.out.println("[Log] >>> 검색어 또는 기간 값이 잘못된 요청");
+        System.out.println("[Log] >>> 검색어 또는 기간 값이 잘못된 요청.");
         return ResponseEntity.badRequest()
                 .body(ErrorResponse.of(400, HttpStatus.BAD_REQUEST, e.getMessage()));
     }
 
     @ExceptionHandler(InternalFlaskErrorException.class)
     public ResponseEntity<ErrorResponse> handleInternalFlaskErrorException(InternalFlaskErrorException e) {
-        System.out.println("[Log] >>> 검색어 또는 기간 값이 잘못된 요청");
+        System.out.println("[Log] >>> Flask 서버가 비정상적인 응답을 반환함.");
         return ResponseEntity.badRequest()
-                .body(ErrorResponse.of(400, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                .body(ErrorResponse.of(500, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
